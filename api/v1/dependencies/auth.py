@@ -6,14 +6,14 @@ from jose import jwt, JWTError
 from passlib.context import CryptContext
 from starlette import status
 
-from api.dependencies.db import dao_provider
-from api.models.auth import Token
+from api.v1.dependencies.db import dao_provider
+from api.v1.models.auth import Token
 from config import AuthConfig
 from finances.database.dao import DAO
 from finances.exceptions.user import UserNotFound
 from finances.models import dto
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/api/v1/auth/login')
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/login')
 
 
 def get_current_user(token: str = Depends(oauth2_scheme)):

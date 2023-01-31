@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.params import Body
 from starlette import status
 
-from api.dependencies import get_current_user, dao_provider, AuthProvider, get_auth_provider
-from api.models.auth import UserCreate
+from api.v1.dependencies import get_current_user, dao_provider, AuthProvider, get_auth_provider
+from api.v1.models.auth import UserCreate
 from finances.database.dao.holder import DAO
 from finances.exceptions.user import UserException
 from finances.models import dto
