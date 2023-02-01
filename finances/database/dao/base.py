@@ -1,7 +1,7 @@
 from typing import Generic, Type, TypeVar, Any, Sequence
 from uuid import UUID
 
-from sqlalchemy import select, func, Row, RowMapping
+from sqlalchemy import select, func, Row, RowMapping, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Load
 
@@ -15,7 +15,8 @@ class BaseDAO(Generic[Model]):
         self.model = model
         self.session = session
 
-    async def get_by_id(self, id_: int | UUID | tuple, options: list[Load] = None):
+    async def get_by_id(self, id_: int | UUID | tuple,
+                        options: list[Load] = None) -> Model:
         return await self.session.get(self.model, id_, options=options)
 
     async def get_all(self) -> Sequence[Row | RowMapping | Any]:
@@ -28,11 +29,15 @@ class BaseDAO(Generic[Model]):
     async def delete(self, obj: Model):
         await self.session.delete(obj)
 
+    async def delete_all(self):
+        await self.session.execute(delete(self.model))
+
     async def flush(self, *objects):
         await self.session.flush(objects)
 
     async def count(self):
-        result = await self.session.execute(select([func.count()]).select_from(self.model))
+        result = await self.session.execute(
+            select([func.count()]).select_from(self.model))
         return result.scalar_one()
 
     async def commit(self):

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from uuid import UUID
 
@@ -6,9 +8,17 @@ from finances.models.enums.user_type import UserType
 
 @dataclass
 class User:
-    id: UUID
-    username: str
-    user_type: UserType
+    id: UUID | None = None
+    username: str | None = None
+    user_type: UserType | None = None
+
+    @classmethod
+    def from_dict(cls, dct: dict) -> User:
+        return User(
+            id=UUID(dct.get('id')),
+            username=dct.get('username'),
+            user_type=UserType(dct.get('user_type'))
+        )
 
     def add_password(self, hashed_password: str):
         return UserWithCreds(

@@ -2,18 +2,19 @@ import logging
 
 import uvicorn
 
-from fastapi import FastAPI, APIRouter
+from fastapi import APIRouter
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from api import v1
-from config import load_config
+from api.load_config import load_config
+from api.main_factory import create_app
 
 
 def main():
     logging.basicConfig(level=logging.DEBUG)
 
     # app = FastAPI(swagger_ui_parameters={"defaultModelsExpandDepth": -1})
-    app = FastAPI()
+    app = create_app()
     config = load_config()
     engine = create_async_engine(url=config.db.make_url, echo=True)
     async_session = async_sessionmaker(engine, expire_on_commit=False)
@@ -28,8 +29,8 @@ def main():
 
     app.include_router(main_api_router)
 
-    uvicorn.run(app, port=8000)
+    return app
 
 
 if __name__ == '__main__':
-    main()
+    uvicorn.run('api:main', factory=True, log_config=None)

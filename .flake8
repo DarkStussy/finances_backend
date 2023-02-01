@@ -1,0 +1,5 @@
+[flake8]
+exclude = .git, __pycache__, finances/database/migrations, .pytest_cache, .idea, venv
+per-file-ignores=
+    tests/**:D1,E800,A003
+    **/__init__.py:F401
