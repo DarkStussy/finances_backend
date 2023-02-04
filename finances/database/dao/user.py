@@ -34,10 +34,9 @@ class UserDAO(BaseDAO[User]):
         else:
             return user
 
-    async def create(self, user: dto.UserWithCreds) -> dto.User:
+    async def create(self, user_dto: dto.UserWithCreds) -> dto.User:
         try:
-            user = User(username=user.username, password=user.hashed_password,
-                        user_type=user.user_type.value)
+            user = User.from_dto(user_dto)
             self.save(user)
             await self.session.commit()
         except IntegrityError as e:
@@ -47,7 +46,7 @@ class UserDAO(BaseDAO[User]):
             return user.to_dto()
 
     async def set_password(self, user: dto.User, hashed_password: str):
-        db_user = await self.get_by_id(user.id)
+        db_user = await self._get_by_id(user.id)
         db_user.password = hashed_password
 
     async def delete_by_id(self, id_: UUID):

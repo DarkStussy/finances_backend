@@ -14,7 +14,7 @@ def setup(app: FastAPI,
     db_provider = DatabaseProvider(session=db_sessionmaker)
     auth_provider = AuthProvider(config.auth)
 
-    api_router.include_router(auth_provider.router, )
+    api_router.include_router(auth_provider.router)
 
     app.dependency_overrides[dao_provider] = db_provider.dao
     app.dependency_overrides[get_current_user] = auth_provider.get_current_user

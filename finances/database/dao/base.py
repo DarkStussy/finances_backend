@@ -15,11 +15,11 @@ class BaseDAO(Generic[Model]):
         self.model = model
         self.session = session
 
-    async def get_by_id(self, id_: int | UUID | tuple,
-                        options: list[Load] = None) -> Model:
+    async def _get_by_id(self, id_: int | UUID | tuple,
+                         options: list[Load] = None) -> Model:
         return await self.session.get(self.model, id_, options=options)
 
-    async def get_all(self) -> Sequence[Row | RowMapping | Any]:
+    async def _get_all(self) -> Sequence[Row | RowMapping | Any]:
         result = await self.session.execute(select(self.model))
         return result.scalars().all()
 
