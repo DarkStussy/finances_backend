@@ -34,9 +34,8 @@ async def signup(user_create: UserCreate,
 async def set_password_route(
         password: str = Body(
             default=None,
-            regex='(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).*',
-            min_length=8,
-            max_length=32),
+            regex='^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])'
+                  '.{8,32}$'),
         auth: AuthProvider = Depends(get_auth_provider),
         user: dto.User = Depends(get_current_user),
         dao: DAO = Depends(dao_provider),

@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 from _decimal import Decimal
 
 from pydantic import BaseModel, Field
+
+from finances.models import dto
 
 
 class CurrencyCreate(BaseModel):
@@ -10,8 +14,17 @@ class CurrencyCreate(BaseModel):
                                            decimal_places=6)
 
 
-class CreatedCurrency(BaseModel):
+class CurrencyModel(BaseModel):
     id: int
     name: str
     code: str
     rate_to_base_currency: Decimal
+
+    @classmethod
+    def from_dto(cls, currency_dto: dto.Currency) -> CurrencyModel:
+        return CurrencyModel(
+            id=currency_dto.id,
+            name=currency_dto.name,
+            code=currency_dto.code,
+            rate_to_base_currency=currency_dto.rate_to_base_currency,
+        )
