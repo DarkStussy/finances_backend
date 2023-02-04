@@ -6,7 +6,7 @@ from fastapi import APIRouter
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from api import v1
-from api.load_config import load_config
+from api.config import load_config
 from api.main_factory import create_app
 
 
