@@ -45,8 +45,8 @@ class UserConfiguration(Base):
                                              ondelete='CASCADE'))
 
 
-class Balance(Base):
-    __tablename__ = 'balance'
+class Asset(Base):
+    __tablename__ = 'asset'
 
     id = mapped_column(UUID(as_uuid=True), primary_key=True,
                        default=uuid.uuid4)
@@ -60,7 +60,7 @@ class Balance(Base):
     amount = mapped_column(Numeric, default=0)
 
     __table_args__ = (
-        UniqueConstraint('user', 'title', name='u_balance1'),
+        UniqueConstraint('user', 'title', name='unique_asset'),
     )
 
 
@@ -83,7 +83,7 @@ class Transaction(Base):
     user = mapped_column(UUID(as_uuid=True),
                          ForeignKey('user.id', ondelete='CASCADE'),
                          nullable=False)
-    balance = mapped_column(String, nullable=False)
+    asset = mapped_column(String, nullable=False)
     category = mapped_column(String, nullable=False)
     type = mapped_column(String, nullable=False)
     amount = mapped_column(Numeric, nullable=False)
