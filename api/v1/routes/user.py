@@ -11,13 +11,13 @@ from finances.models.enums.user_type import UserType
 from finances.services.user import set_password
 
 
-async def get_me(current_user: dto.User = Depends(get_current_user)):
+async def get_user_route(current_user: dto.User = Depends(get_current_user)):
     return current_user
 
 
-async def signup(user_create: UserCreate,
-                 auth_provider: AuthProvider = Depends(get_auth_provider),
-                 dao: DAO = Depends(dao_provider)):
+async def signup_route(user_create: UserCreate,
+                       auth_provider: AuthProvider = Depends(get_auth_provider),
+                       dao: DAO = Depends(dao_provider)):
     try:
         await dao.user.create(
             dto.UserWithCreds(username=user_create.username,
@@ -47,7 +47,7 @@ async def set_password_route(
 
 def user_router() -> APIRouter:
     router = APIRouter()
-    router.add_api_route('/me', get_me, methods=['GET'])
-    router.add_api_route('/signup', signup, methods=['POST'])
+    router.add_api_route('/me', get_user_route, methods=['GET'])
+    router.add_api_route('/signup', signup_route, methods=['POST'])
     router.add_api_route('/setpassword', set_password_route, methods=['PUT'])
     return router

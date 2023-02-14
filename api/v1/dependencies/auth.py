@@ -94,12 +94,13 @@ class AuthProvider:
             raise credentials_exception
         return user
 
-    async def login(self, form_data: OAuth2PasswordRequestForm = Depends(),
-                    dao: DAO = Depends(dao_provider),
-                    ) -> Token:
+    async def login_route(self,
+                          form_data: OAuth2PasswordRequestForm = Depends(),
+                          dao: DAO = Depends(dao_provider),
+                          ) -> Token:
         user = await self.authenticate_user(form_data.username,
                                             form_data.password, dao)
         return self.create_user_token(user)
 
     def setup_auth_routes(self):
-        self.router.add_api_route('/login', self.login, methods=['POST'])
+        self.router.add_api_route('/login', self.login_route, methods=['POST'])
