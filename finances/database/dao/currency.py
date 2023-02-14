@@ -1,3 +1,6 @@
+import uuid
+
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from finances.database.dao import BaseDAO
@@ -13,8 +16,14 @@ class CurrencyDAO(BaseDAO[Currency]):
         currency = await self._get_by_id(id_)
         return currency.to_dto() if currency else None
 
+    async def get_all_by_user_id(self, user_id: uuid.UUID | None = None) \
+            -> list[dto.Currency]:
+        currencies = await self.session.execute(
+            select(Currency).where(Currency.user == user_id))
+        return [currency.to_dto() for currency in currencies.scalars().all()]
+
     async def create(self, currency_dto: dto.Currency) -> dto.Currency:
         currency = Currency.from_dto(currency_dto)
         self.save(currency)
         await self.session.commit()
-        return currency
+        return currency.to_dto()

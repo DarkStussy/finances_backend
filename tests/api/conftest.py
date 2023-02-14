@@ -9,7 +9,12 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from api import v1
 from api.main_factory import create_app
 from api.v1.dependencies import AuthProvider
+from finances.database.dao import DAO
+from finances.exceptions.user import UserExists
+from finances.models import dto
 from finances.models.dto.config import Config
+from finances.services.user import set_password
+from tests.fixtures.user_data import get_test_user
 
 
 @pytest.fixture(scope="session")
@@ -35,3 +40,15 @@ async def client(app: FastAPI) -> AsyncGenerator[AsyncClient, None]:
 @pytest.fixture(scope='session')
 def auth(config: Config) -> AuthProvider:
     return AuthProvider(config.auth)
+
+
+@pytest_asyncio.fixture
+async def user(dao: DAO, auth: AuthProvider) -> dto.User:
+    test_user = get_test_user()
+    try:
+        password = auth.get_password_hash('12345')
+        user_ = await dao.user.create(test_user.add_password(password))
+        await set_password(user_, password, dao.user)
+    except UserExists:
+        user_ = await dao.user.get_by_username(test_user.username)
+    return user_

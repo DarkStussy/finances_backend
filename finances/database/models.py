@@ -90,7 +90,8 @@ class Currency(Base):
     rate_to_base_currency: Mapped[Optional[Decimal]] = mapped_column(Numeric)
     user: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True),
                                             ForeignKey('user.id',
-                                                       ondelete='CASCADE'))
+                                                       ondelete='CASCADE'),
+                                            nullable=True)
 
     def to_dto(self) -> dto.Currency:
         return dto.Currency(

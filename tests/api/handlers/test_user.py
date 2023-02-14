@@ -1,22 +1,9 @@
 import pytest
-import pytest_asyncio
 from httpx import AsyncClient
 
 from api.v1.dependencies import AuthProvider
 from finances.database.dao import DAO
 from finances.models import dto
-from finances.services.user import set_password
-from tests.fixtures.user_data import get_test_user
-
-
-@pytest_asyncio.fixture
-async def user(dao: DAO, auth: AuthProvider) -> dto.User:
-    password = auth.get_password_hash('12345')
-    user_ = await dao.user.create(get_test_user().add_password(password))
-    await set_password(user_, password, dao.user)
-    yield user_
-    await dao.user.delete_by_id(user_.id)
-    await dao.commit()
 
 
 @pytest.mark.asyncio

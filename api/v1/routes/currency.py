@@ -1,4 +1,4 @@
-from fastapi import Depends, APIRouter, HTTPException
+from fastapi import Depends, APIRouter, HTTPException, Query
 from starlette import status
 
 from api.v1.dependencies import get_current_user, dao_provider
@@ -29,10 +29,23 @@ async def get_currency_by_id_route(
     return CurrencyModel.from_dto(currency)
 
 
+async def get_currencies_route(
+        include_defaults: bool = Query(default=False),
+        current_user: dto.User = Depends(get_current_user),
+        dao: DAO = Depends(dao_provider)) -> list[dto.Currency]:
+    currencies = await dao.currency.get_all_by_user_id(current_user.id)
+    if not include_defaults:
+        return currencies
+
+    default_currencies = await dao.currency.get_all_by_user_id()
+    return default_currencies + currencies
+
+
 def currency_router() -> APIRouter:
     router = APIRouter()
     router.add_api_route('/add', add_new_currency_route, methods=['POST'],
                          response_model=CurrencyModel)
+    router.add_api_route('/all', get_currencies_route, methods=['GET'])
     router.add_api_route('/{currency_id}', get_currency_by_id_route,
                          methods=['GET'], response_model=CurrencyModel)
     return router

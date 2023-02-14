@@ -41,6 +41,7 @@ class UserDAO(BaseDAO[User]):
             await self.session.commit()
         except IntegrityError as e:
             if e.code == 'gkpj':
+                await self.session.rollback()
                 raise UserExists()
         else:
             return user.to_dto()
