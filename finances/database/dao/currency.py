@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from finances.database.dao import BaseDAO
@@ -27,3 +27,24 @@ class CurrencyDAO(BaseDAO[Currency]):
         self.save(currency)
         await self.session.commit()
         return currency.to_dto()
+
+    async def merge(self, currency_dto: dto.Currency) -> dto.Currency:
+        currency = await self.session.merge(
+            Currency(
+                id=currency_dto.id,
+                name=currency_dto.name,
+                code=currency_dto.code,
+                rate_to_base_currency=currency_dto.rate_to_base_currency
+            )
+        )
+        await self.session.commit()
+        return currency.to_dto()
+
+    async def delete_by_id(self, currency_id: int, user_id: uuid.UUID) -> int:
+        stmt = delete(Currency) \
+            .where(Currency.id == currency_id,
+                   Currency.user == user_id) \
+            .returning(Currency.id)
+        currency = await self.session.execute(stmt)
+        await self.session.commit()
+        return currency.scalar()

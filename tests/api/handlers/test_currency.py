@@ -1,10 +1,10 @@
 import dataclasses
+from _decimal import Decimal
 
 import pytest
 from httpx import AsyncClient
 
 from api.v1.dependencies import AuthProvider
-from finances.database.dao import DAO
 from finances.models import dto
 from tests.fixtures.currency_data import get_test_currency
 
@@ -16,6 +16,7 @@ async def test_add_currency(
         auth: AuthProvider):
     token = auth.create_user_token(user)
     currency = get_test_currency()
+    currency.rate_to_base_currency = Decimal('0.1')
     resp = await client.post(
         '/api/v1/currency/add',
         headers={
@@ -46,16 +47,76 @@ async def test_add_currency(
 
 
 @pytest.mark.asyncio
+async def test_change_currency(
+        currency: dto.Currency,
+        client: AsyncClient,
+        user: dto.User,
+        auth: AuthProvider):
+    token = auth.create_user_token(user)
+    changed_currency = {
+        'name': 'changed test',
+        'code': 'CTD',
+        'rate_to_base_currency': 0.5,
+        'id': currency.id
+    }
+    resp = await client.put(
+        '/api/v1/currency/change',
+        headers={
+            'Authorization': 'Bearer ' + token.access_token},
+        json=changed_currency
+    )
+
+    assert resp.is_success
+
+    assert changed_currency == resp.json()
+
+
+@pytest.mark.asyncio
+async def test_delete_currency(
+        currency: dto.Currency,
+        auth: AuthProvider,
+        user: dto.User,
+        client: AsyncClient):
+    token = auth.create_user_token(user)
+    del_curr = lambda: client.delete(  # noqa
+        f'/api/v1/currency/delete/{currency.id}',
+        headers={
+            'Authorization': 'Bearer ' + token.access_token},
+    )
+    resp = await del_curr()
+    assert resp.is_success
+    resp = await del_curr()
+    assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_get_currency(
+        client: AsyncClient,
+        user: dto.User,
+        auth: AuthProvider,
+        currency: dto.Currency):
+    token = auth.create_user_token(user)
+    resp = await client.get(
+        f'/api/v1/currency/{currency.id}',
+        headers={
+            'Authorization': 'Bearer ' + token.access_token},
+    )
+    assert resp.is_success
+    currency_dict = {'name': currency.name,
+                     'code': currency.code,
+                     'rate_to_base_currency': float(
+                         currency.rate_to_base_currency),
+                     'id': currency.id}
+    assert resp.json() == currency_dict
+
+
+@pytest.mark.asyncio
 async def test_get_currencies(
         client: AsyncClient,
         user: dto.User,
         auth: AuthProvider,
-        dao: DAO):
+        currency: dto.Currency):
     token = auth.create_user_token(user)
-    default_currency_dto = get_test_currency()
-    default_currency_dto.name = 'defcur'
-    default_currency_dto.code = 'DCR'
-    default_currency_dto = await dao.currency.create(default_currency_dto)
 
     resp = await client.get(
         '/api/v1/currency/all?include_defaults=true',
@@ -63,7 +124,8 @@ async def test_get_currencies(
             'Authorization': 'Bearer ' + token.access_token},
     )
     assert resp.is_success
-    default_currency_dict = dataclasses.asdict(default_currency_dto)
+    default_currency_dict = dataclasses.asdict(currency)
     default_currency_dict['rate_to_base_currency'] = float(
-        default_currency_dto.rate_to_base_currency)
+        default_currency_dict['rate_to_base_currency'])
+    default_currency_dict['user'] = str(default_currency_dict['user'])
     assert default_currency_dict in resp.json()

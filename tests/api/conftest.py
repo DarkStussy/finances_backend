@@ -1,3 +1,4 @@
+from _decimal import Decimal
 from typing import AsyncGenerator
 
 import pytest
@@ -10,14 +11,16 @@ from api import v1
 from api.main_factory import create_app
 from api.v1.dependencies import AuthProvider
 from finances.database.dao import DAO
+from finances.database.models import Currency
 from finances.exceptions.user import UserExists
 from finances.models import dto
 from finances.models.dto.config import Config
 from finances.services.user import set_password
+from tests.fixtures.currency_data import get_test_currency
 from tests.fixtures.user_data import get_test_user
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 def app(config: Config, sessionmaker: async_sessionmaker) -> FastAPI:
     app = create_app()
     api_router_v1 = APIRouter()
@@ -52,3 +55,20 @@ async def user(dao: DAO, auth: AuthProvider) -> dto.User:
     except UserExists:
         user_ = await dao.user.get_by_username(test_user.username)
     return user_
+
+
+@pytest_asyncio.fixture
+async def currency(dao: DAO, user: dto.User) -> dto.Currency:
+    curr_dto = get_test_currency()
+    curr = await dao.session.merge(
+        Currency(
+            id=curr_dto.id,
+            name=curr_dto.name,
+            code=curr_dto.code,
+            is_custom=True,
+            rate_to_base_currency=Decimal('0.1'),
+            user=user.id,
+        )
+    )
+    await dao.commit()
+    return curr.to_dto()

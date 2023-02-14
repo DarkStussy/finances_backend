@@ -8,17 +8,14 @@ from finances.models import dto
 
 
 class CurrencyCreate(BaseModel):
-    name: str = Field(regex='^[A-Za-z]{3,50}$')
+    name: str = Field(regex=r'^[A-Za-z\s]{3,50}$')
     code: str = Field(regex='^[A-Z]{3}$')
     rate_to_base_currency: Decimal = Field(gt=0, max_digits=8,
                                            decimal_places=6)
 
 
-class CurrencyModel(BaseModel):
+class CurrencyModel(CurrencyCreate):
     id: int
-    name: str
-    code: str
-    rate_to_base_currency: Decimal
 
     @classmethod
     def from_dto(cls, currency_dto: dto.Currency) -> CurrencyModel:
