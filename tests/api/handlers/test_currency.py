@@ -69,7 +69,7 @@ async def test_change_currency(
     )
 
     assert resp.is_success
-
+    changed_currency['is_custom'] = True
     assert changed_currency == resp.json()
 
 
@@ -153,7 +153,7 @@ async def test_set_base_currency(
     assert resp.is_success
 
     resp = await client.get(
-        f'/api/v1/currency/base_currency',
+        '/api/v1/currency/base_currency',
         headers={
             'Authorization': 'Bearer ' + token.access_token},
     )

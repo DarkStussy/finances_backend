@@ -2,8 +2,8 @@ from fastapi import Depends, APIRouter, HTTPException, Query
 from starlette import status
 
 from api.v1.dependencies import get_current_user, dao_provider
-from api.v1.models.currency import CurrencyCreate, CurrencyModel, BaseCurrency, \
-    CurrencyChange
+from api.v1.models.currency import CurrencyCreate, CurrencyModel, \
+    BaseCurrency, CurrencyChange
 from finances.database.dao import DAO
 from finances.exceptions.currency import CurrencyNotFound, CurrencyCantBeBase
 from finances.models import dto
@@ -46,7 +46,7 @@ async def change_currency_route(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=e.message)
 
-    return CurrencyChange.from_dto(currency)
+    return CurrencyModel.from_dto(currency)
 
 
 async def delete_currency_route(
@@ -110,7 +110,7 @@ def currency_router() -> APIRouter:
                          methods=['POST'], response_model=CurrencyModel)
     router.add_api_route('/change', change_currency_route,
                          methods=['PUT'],
-                         response_model=CurrencyChange)
+                         response_model=CurrencyModel)
     router.add_api_route('/delete/{currency_id}', delete_currency_route,
                          methods=['DELETE'])
     router.add_api_route('/all', get_currencies_route,

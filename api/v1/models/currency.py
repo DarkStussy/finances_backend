@@ -18,13 +18,12 @@ class CurrencyChange(CurrencyCreate):
     id: int
 
     @classmethod
-    def from_dto(cls, currency_dto: dto.Currency) -> CurrencyModel:
-        return CurrencyModel(
+    def from_dto(cls, currency_dto: dto.Currency) -> CurrencyChange:
+        return CurrencyChange(
             id=currency_dto.id,
             name=currency_dto.name,
             code=currency_dto.code,
             rate_to_base_currency=currency_dto.rate_to_base_currency,
-            is_custom=currency_dto.is_custom
         )
 
 
