@@ -6,11 +6,12 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import String, Integer, ForeignKey, Numeric, Boolean, \
-    BigInteger, func, DateTime, \
+    BigInteger, DateTime, \
     PrimaryKeyConstraint, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
 
+from finances.database.functions import utcnow
 from finances.models import dto
 from finances.models.enums.user_type import UserType
 
@@ -132,9 +133,9 @@ class Transaction(Base):
     type: Mapped[str] = mapped_column(String, nullable=False)
     amount: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
     created: Mapped[datetime] = mapped_column(DateTime(timezone=True),
-                                              default=func.now())
+                                              default=utcnow())
     updated: Mapped[datetime] = mapped_column(DateTime(timezone=True),
-                                              default=func.now())
+                                              default=utcnow())
 
 
 class TransactionCategory(Base):
@@ -196,6 +197,6 @@ class CryptoPortfolioTransaction(Base):
         nullable=False)
     amount: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
     created: Mapped[datetime] = mapped_column(DateTime(timezone=True),
-                                              default=func.now())
+                                              default=utcnow())
     updated: Mapped[datetime] = mapped_column(DateTime(timezone=True),
-                                              default=func.now())
+                                              default=utcnow())
