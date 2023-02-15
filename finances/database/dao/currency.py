@@ -25,7 +25,7 @@ class CurrencyDAO(BaseDAO[Currency]):
     async def create(self, currency_dto: dto.Currency) -> dto.Currency:
         currency = Currency.from_dto(currency_dto)
         self.save(currency)
-        await self.session.commit()
+        await self.commit()
         return currency.to_dto()
 
     async def merge(self, currency_dto: dto.Currency) -> dto.Currency:
@@ -37,7 +37,7 @@ class CurrencyDAO(BaseDAO[Currency]):
                 rate_to_base_currency=currency_dto.rate_to_base_currency
             )
         )
-        await self.session.commit()
+        await self.commit()
         return currency.to_dto()
 
     async def delete_by_id(self, currency_id: int, user_id: uuid.UUID) -> int:
@@ -46,5 +46,5 @@ class CurrencyDAO(BaseDAO[Currency]):
                    Currency.user == user_id) \
             .returning(Currency.id)
         currency = await self.session.execute(stmt)
-        await self.session.commit()
+        await self.commit()
         return currency.scalar()

@@ -3,7 +3,7 @@ from uuid import UUID
 
 from sqlalchemy import select, func, Row, RowMapping, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Load
+from sqlalchemy.orm.interfaces import ORMOption
 
 from finances.database.models import Base
 
@@ -16,7 +16,7 @@ class BaseDAO(Generic[Model]):
         self.session = session
 
     async def _get_by_id(self, id_: int | UUID | tuple,
-                         options: list[Load] = None) -> Model:
+                         options: list[ORMOption] = None) -> Model:
         return await self.session.get(self.model, id_, options=options)
 
     async def _get_all(self) -> Sequence[Row | RowMapping | Any]:

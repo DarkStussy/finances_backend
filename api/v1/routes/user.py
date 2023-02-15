@@ -15,9 +15,10 @@ async def get_user_route(current_user: dto.User = Depends(get_current_user)):
     return current_user
 
 
-async def signup_route(user_create: UserCreate,
-                       auth_provider: AuthProvider = Depends(get_auth_provider),
-                       dao: DAO = Depends(dao_provider)):
+async def signup_route(
+        user_create: UserCreate,
+        auth_provider: AuthProvider = Depends(get_auth_provider),
+        dao: DAO = Depends(dao_provider)):
     try:
         await dao.user.create(
             dto.UserWithCreds(username=user_create.username,

@@ -5,8 +5,10 @@ import pytest
 from httpx import AsyncClient
 
 from api.v1.dependencies import AuthProvider
+from finances.database.dao import DAO
 from finances.models import dto
-from tests.fixtures.currency_data import get_test_currency
+from tests.fixtures.currency_data import get_test_currency, \
+    get_test_base_currency
 
 
 @pytest.mark.asyncio
@@ -106,6 +108,7 @@ async def test_get_currency(
                      'code': currency.code,
                      'rate_to_base_currency': float(
                          currency.rate_to_base_currency),
+                     'is_custom': currency.is_custom,
                      'id': currency.id}
     assert resp.json() == currency_dict
 
@@ -129,3 +132,35 @@ async def test_get_currencies(
         default_currency_dict['rate_to_base_currency'])
     default_currency_dict['user'] = str(default_currency_dict['user'])
     assert default_currency_dict in resp.json()
+
+
+@pytest.mark.asyncio
+async def test_set_base_currency(
+        client: AsyncClient,
+        user: dto.User,
+        auth: AuthProvider,
+        dao: DAO
+):
+    currency = await dao.currency.create(get_test_base_currency())
+
+    token = auth.create_user_token(user)
+    resp = await client.post(
+        f'/api/v1/currency/base_currency/{currency.id}',
+        headers={
+            'Authorization': 'Bearer ' + token.access_token},
+    )
+
+    assert resp.is_success
+
+    resp = await client.get(
+        f'/api/v1/currency/base_currency',
+        headers={
+            'Authorization': 'Bearer ' + token.access_token},
+    )
+
+    assert resp.is_success
+
+    currency_json = resp.json()
+
+    assert {'id': currency.id, 'name': currency.name,
+            'code': currency.code, 'is_custom': False} == currency_json

@@ -3,9 +3,10 @@ from uuid import UUID
 from sqlalchemy import select, delete
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from finances.database.dao.base import BaseDAO
-from finances.database.models import User
+from finances.database.models import User, UserConfiguration
 from finances.exceptions.user import UserExists, UserNotFound
 from finances.models import dto
 
@@ -37,8 +38,10 @@ class UserDAO(BaseDAO[User]):
     async def create(self, user_dto: dto.UserWithCreds) -> dto.User:
         try:
             user = User.from_dto(user_dto)
+            config = UserConfiguration(id=user.id)
+            user.config = config
             self.save(user)
-            await self.session.commit()
+            await self.commit()
         except IntegrityError as e:
             if e.code == 'gkpj':
                 await self.session.rollback()
@@ -49,6 +52,18 @@ class UserDAO(BaseDAO[User]):
     async def set_password(self, user: dto.User, hashed_password: str):
         db_user = await self._get_by_id(user.id)
         db_user.password = hashed_password
+
+    async def get_base_currency(self, user: dto.User) -> dto.Currency | None:
+        config = await self.session.get(UserConfiguration, user.id,
+                                        options=[joinedload(
+                                            UserConfiguration.currency)])
+        return config.currency.to_dto() if config.currency else None
+
+    async def set_base_currency(self, user: dto.User, currency_id: int):
+        config = await self.session.get(UserConfiguration, user.id)
+        config.base_currency = currency_id
+        await self.session.merge(config)
+        await self.commit()
 
     async def delete_by_id(self, id_: UUID):
         await self.session.execute(delete(User).where(User.id == id_))

@@ -9,7 +9,7 @@ from sqlalchemy import String, Integer, ForeignKey, Numeric, Boolean, \
     BigInteger, func, DateTime, \
     PrimaryKeyConstraint, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped
+from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
 
 from finances.models import dto
 from finances.models.enums.user_type import UserType
@@ -30,6 +30,8 @@ class User(Base):
                                           nullable=False)
     password: Mapped[str] = mapped_column(String, nullable=False)
     user_type: Mapped[str] = mapped_column(String, nullable=False)
+
+    config: Mapped['UserConfiguration'] = relationship()
 
     def to_dto(self) -> dto.User:
         return dto.User(
@@ -56,7 +58,9 @@ class UserConfiguration(Base):
                                           primary_key=True)
     base_currency: Mapped[int] = mapped_column(Integer,
                                                ForeignKey('currency.id',
-                                                          ondelete='CASCADE'))
+                                                          ondelete='CASCADE'),
+                                               nullable=True)
+    currency: Mapped['Currency'] = relationship()
 
 
 class Asset(Base):

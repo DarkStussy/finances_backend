@@ -9,3 +9,10 @@ class CurrencyNotFound(CurrencyException):
                  msg: str = 'Currency not found'):
         self.message = msg
         super().__init__(msg)
+
+
+class CurrencyCantBeBase(CurrencyException):
+    def __init__(self,
+                 msg: str = 'Currency cannot be base'):
+        self.message = msg
+        super().__init__(msg)
