@@ -119,7 +119,7 @@ def currency_router() -> APIRouter:
                          methods=['GET'], response_model=BaseCurrency)
     router.add_api_route('/base_currency/{currency_id}',
                          set_base_currency_route,
-                         methods=['POST'])
+                         methods=['PUT'])
     router.add_api_route('/{currency_id}', get_currency_by_id_route,
                          methods=['GET'],
                          response_model=CurrencyModel | BaseCurrency)
