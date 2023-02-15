@@ -31,7 +31,7 @@ class UserDAO(BaseDAO[User]):
         try:
             user = result.scalar_one()
         except NoResultFound as e:
-            raise UserNotFound() from e
+            raise UserNotFound from e
         else:
             return user
 
@@ -45,9 +45,13 @@ class UserDAO(BaseDAO[User]):
         except IntegrityError as e:
             if e.code == 'gkpj':
                 await self.session.rollback()
-                raise UserExists()
+                raise UserExists from e
         else:
             return user.to_dto()
+
+    async def set_username(self, user: dto.User, username: str):
+        db_user = await self._get_by_id(user.id)
+        db_user.username = username
 
     async def set_password(self, user: dto.User, hashed_password: str):
         db_user = await self._get_by_id(user.id)

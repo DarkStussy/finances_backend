@@ -51,7 +51,6 @@ async def user(dao: DAO, auth: AuthProvider) -> dto.User:
     try:
         password = auth.get_password_hash('12345')
         user_ = await dao.user.create(test_user.add_password(password))
-        await set_password(user_, password, dao.user)
     except UserExists:
         user_ = await dao.user.get_by_username(test_user.username)
     return user_

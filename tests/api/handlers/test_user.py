@@ -42,13 +42,40 @@ async def test_auth(client: AsyncClient, user: dto.User):
 
 
 @pytest.mark.asyncio
+async def test_change_username(client: AsyncClient,
+                               user: dto.User,
+                               auth: AuthProvider,
+                               dao: DAO):
+    token = auth.create_user_token(user)
+    new_username = 'test12345'
+    resp = await client.put(
+        '/api/v1/users/setusername',
+        headers={'Authorization': 'Bearer ' + token.access_token},
+        json={'username': new_username},
+    )
+    assert resp.is_success
+
+    user.username = new_username
+    token = auth.create_user_token(user)
+    resp = await client.get(
+        '/api/v1/users/me',
+        headers={'Authorization': 'Bearer ' + token.access_token},
+    )
+    assert resp.is_success
+    user_json = resp.json()
+    assert user_json['username'] == user.username
+
+    await dao.user.delete_by_id(user.id)
+
+
+@pytest.mark.asyncio
 async def test_change_password(client: AsyncClient, user: dto.User,
                                auth: AuthProvider):
     token = auth.create_user_token(user)
     resp = await client.put(
         '/api/v1/users/setpassword',
         headers={'Authorization': 'Bearer ' + token.access_token},
-        json='test123!T',
+        json={'password': 'test123!T'},
     )
     assert resp.is_success
 
