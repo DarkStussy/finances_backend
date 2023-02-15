@@ -135,7 +135,8 @@ class Transaction(Base):
     created: Mapped[datetime] = mapped_column(DateTime(timezone=True),
                                               default=utcnow())
     updated: Mapped[datetime] = mapped_column(DateTime(timezone=True),
-                                              default=utcnow())
+                                              default=utcnow(),
+                                              onupdate=utcnow())
 
 
 class TransactionCategory(Base):
@@ -199,4 +200,5 @@ class CryptoPortfolioTransaction(Base):
     created: Mapped[datetime] = mapped_column(DateTime(timezone=True),
                                               default=utcnow())
     updated: Mapped[datetime] = mapped_column(DateTime(timezone=True),
-                                              default=utcnow())
+                                              default=utcnow(),
+                                              onupdate=utcnow())
