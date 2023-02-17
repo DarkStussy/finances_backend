@@ -6,8 +6,7 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import String, Integer, ForeignKey, Numeric, Boolean, \
-    BigInteger, DateTime, \
-    PrimaryKeyConstraint, UniqueConstraint
+    BigInteger, DateTime, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
 
@@ -57,11 +56,12 @@ class UserConfiguration(Base):
                                           ForeignKey('user.id',
                                                      ondelete='CASCADE'),
                                           primary_key=True)
-    base_currency: Mapped[int] = mapped_column(Integer,
-                                               ForeignKey('currency.id',
-                                                          ondelete='CASCADE'),
-                                               nullable=True)
-    currency: Mapped['Currency'] = relationship()
+    base_currency_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey('currency.id', ondelete='CASCADE'),
+        nullable=True)
+
+    base_currency: Mapped['Currency'] = relationship()
 
 
 class Asset(Base):
@@ -69,20 +69,42 @@ class Asset(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True,
                                           default=uuid.uuid4)
-    user: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True),
-                                            ForeignKey('user.id',
-                                                       ondelete='CASCADE'),
-                                            nullable=False)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True),
+                                               ForeignKey('user.id',
+                                                          ondelete='CASCADE'),
+                                               nullable=False)
     title: Mapped[str] = mapped_column(String, nullable=False)
-    currency: Mapped[int] = mapped_column(Integer,
-                                          ForeignKey('currency.id',
-                                                     ondelete='SET NULL'),
-                                          nullable=False)
+    currency_id: Mapped[int] = mapped_column(Integer,
+                                             ForeignKey('currency.id',
+                                                        ondelete='SET NULL'),
+                                             nullable=True)
     amount: Mapped[Decimal] = mapped_column(Numeric, default=0)
 
+    user: Mapped['User'] = relationship()
+    currency: Mapped['Currency'] = relationship()
+
     __table_args__ = (
-        UniqueConstraint('user', 'title', name='unique_asset'),
+        UniqueConstraint('user_id', 'title', name='unique_asset'),
     )
+
+    def to_dto(self, with_currency: bool = True) -> dto.Asset:
+        return dto.Asset(
+            id=self.id,
+            user_id=self.user_id,
+            title=self.title,
+            currency_id=self.currency_id,
+            amount=self.amount,
+            currency=self.currency.to_dto() if with_currency else None
+        )
+
+    @classmethod
+    def from_dto(cls, asset_dto: dto.Asset) -> Asset:
+        return Asset(
+            user_id=asset_dto.user_id,
+            title=asset_dto.title,
+            currency_id=asset_dto.currency_id,
+            amount=asset_dto.amount
+        )
 
 
 class Currency(Base):
@@ -93,10 +115,12 @@ class Currency(Base):
     code: Mapped[str] = mapped_column(String, nullable=False)
     is_custom: Mapped[bool] = mapped_column(Boolean, default=True)
     rate_to_base_currency: Mapped[Optional[Decimal]] = mapped_column(Numeric)
-    user: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True),
-                                            ForeignKey('user.id',
-                                                       ondelete='CASCADE'),
-                                            nullable=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True),
+                                               ForeignKey('user.id',
+                                                          ondelete='CASCADE'),
+                                               nullable=True)
+
+    user: Mapped['User'] = relationship()
 
     def to_dto(self) -> dto.Currency:
         return dto.Currency(
@@ -105,7 +129,7 @@ class Currency(Base):
             code=self.code,
             is_custom=self.is_custom,
             rate_to_base_currency=self.rate_to_base_currency,
-            user=self.user,
+            user_id=self.user_id,
         )
 
     @classmethod
@@ -116,7 +140,7 @@ class Currency(Base):
             code=currency_dto.code,
             is_custom=currency_dto.is_custom,
             rate_to_base_currency=currency_dto.rate_to_base_currency,
-            user=currency_dto.user,
+            user_id=currency_dto.user_id,
         )
 
 
@@ -124,10 +148,10 @@ class Transaction(Base):
     __tablename__ = 'transaction'
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    user: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True),
-                                            ForeignKey('user.id',
-                                                       ondelete='CASCADE'),
-                                            nullable=False)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True),
+                                               ForeignKey('user.id',
+                                                          ondelete='CASCADE'),
+                                               nullable=False)
     asset: Mapped[str] = mapped_column(String, nullable=False)
     category: Mapped[str] = mapped_column(String, nullable=False)
     type: Mapped[str] = mapped_column(String, nullable=False)
@@ -142,15 +166,17 @@ class Transaction(Base):
 class TransactionCategory(Base):
     __tablename__ = 'transaction_category'
 
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
     title: Mapped[str] = mapped_column(String, nullable=False)
     type: Mapped[str] = mapped_column(String, nullable=False)
-    user: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True),
-                                            ForeignKey('user.id',
-                                                       ondelete='CASCADE'),
-                                            nullable=False)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True),
+                                               ForeignKey('user.id',
+                                                          ondelete='CASCADE'),
+                                               nullable=False)
 
     __table_args__ = (
-        PrimaryKeyConstraint('title', 'type', 'user', name='tran_category_pk'),
+        UniqueConstraint('title', 'type', 'user_id',
+                         name='tran_category_unique'),
     )
 
 
@@ -159,14 +185,14 @@ class CryptoPortfolio(Base):
 
     id: Mapped[int] = mapped_column(UUID(as_uuid=True), primary_key=True,
                                     default=uuid.uuid4)
-    user: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True),
-                                            ForeignKey('user.id',
-                                                       ondelete='CASCADE'),
-                                            nullable=False)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True),
+                                               ForeignKey('user.id',
+                                                          ondelete='CASCADE'),
+                                               nullable=False)
     title: Mapped[str] = mapped_column(String, nullable=False)
 
     __table_args__ = (
-        UniqueConstraint('user', 'title', name='u_crypto_portfolio1'),
+        UniqueConstraint('user_id', 'title', name='u_crypto_portfolio1'),
     )
 
 
@@ -177,22 +203,22 @@ class CryptoCurrency(Base):
     name: Mapped[str] = mapped_column(String, nullable=False)
     code: Mapped[str] = mapped_column(String, nullable=False)
     amount: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
-    portfolio: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True),
-                                                 ForeignKey(
-                                                     'crypto_portfolio.id',
-                                                     ondelete='CASCADE'),
-                                                 nullable=False)
+    portfolio_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True),
+                                                    ForeignKey(
+                                                        'crypto_portfolio.id',
+                                                        ondelete='CASCADE'),
+                                                    nullable=False)
 
 
 class CryptoPortfolioTransaction(Base):
     __tablename__ = 'crypto_portfolio_transaction'
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    portfolio: Mapped[uuid.UUID] = mapped_column(
+    portfolio_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey('crypto_portfolio.id', ondelete='CASCADE'),
         nullable=False)
-    crypto_currency: Mapped[int] = mapped_column(
+    crypto_currency_id: Mapped[int] = mapped_column(
         Integer,
         ForeignKey('crypto_currency.id', ondelete='CASCADE'),
         nullable=False)

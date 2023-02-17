@@ -60,12 +60,12 @@ class UserDAO(BaseDAO[User]):
     async def get_base_currency(self, user: dto.User) -> dto.Currency | None:
         config = await self.session.get(UserConfiguration, user.id,
                                         options=[joinedload(
-                                            UserConfiguration.currency)])
-        return config.currency.to_dto() if config.currency else None
+                                            UserConfiguration.base_currency)])
+        return config.base_currency.to_dto() if config.base_currency else None
 
     async def set_base_currency(self, user: dto.User, currency_id: int):
         config = await self.session.get(UserConfiguration, user.id)
-        config.base_currency = currency_id
+        config.base_currency_id = currency_id
         await self.session.merge(config)
         await self.commit()
 

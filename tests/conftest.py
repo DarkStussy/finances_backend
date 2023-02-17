@@ -69,6 +69,7 @@ async def dao(session: AsyncSession) -> DAO:
 async def clear_data(dao: DAO):
     await dao.user.delete_all()
     await dao.currency.delete_all()
+    await dao.asset.delete_all()
     await dao.commit()
 
 

@@ -9,7 +9,7 @@ async def add_new_currency(
         user: dto.User,
         currency_dao: CurrencyDAO) -> dto.Currency:
     currency_dto = dto.Currency.from_dict(currency)
-    currency_dto.user = user.id
+    currency_dto.user_id = user.id
     currency_dto.is_custom = True
     return await currency_dao.create(currency_dto)
 
@@ -20,7 +20,7 @@ async def change_currency(
         currency_dao: CurrencyDAO) -> dto.Currency:
     changed_currency_dto = dto.Currency.from_dict(currency)
     currency_dto = await currency_dao.get_by_id(changed_currency_dto.id)
-    if currency_dto is None or currency_dto.user != user.id:
+    if currency_dto is None or currency_dto.user_id != user.id:
         raise CurrencyNotFound
 
     return await currency_dao.merge(changed_currency_dto)

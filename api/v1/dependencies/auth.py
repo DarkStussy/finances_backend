@@ -7,7 +7,7 @@ from passlib.context import CryptContext
 from starlette import status
 
 from api.v1.dependencies.db import dao_provider
-from api.v1.models.user import Token
+from api.v1.models.request.token import Token
 from finances.database.dao import DAO
 from finances.exceptions.user import UserNotFound
 from finances.models import dto

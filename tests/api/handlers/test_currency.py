@@ -53,6 +53,7 @@ async def test_change_currency(
         currency: dto.Currency,
         client: AsyncClient,
         user: dto.User,
+        dao: DAO,
         auth: AuthProvider):
     token = auth.create_user_token(user)
     changed_currency = {
@@ -71,6 +72,8 @@ async def test_change_currency(
     assert resp.is_success
     changed_currency['is_custom'] = True
     assert changed_currency == resp.json()
+
+    await dao.currency.delete_by_id(currency.id, user.id)
 
 
 @pytest.mark.asyncio
@@ -130,7 +133,7 @@ async def test_get_currencies(
     default_currency_dict = dataclasses.asdict(currency)
     default_currency_dict['rate_to_base_currency'] = float(
         default_currency_dict['rate_to_base_currency'])
-    default_currency_dict['user'] = str(default_currency_dict['user'])
+    default_currency_dict['user_id'] = str(default_currency_dict['user_id'])
     assert default_currency_dict in resp.json()
 
 
@@ -144,7 +147,7 @@ async def test_set_base_currency(
     currency = await dao.currency.create(get_test_base_currency())
 
     token = auth.create_user_token(user)
-    resp = await client.post(
+    resp = await client.put(
         f'/api/v1/currency/base_currency/{currency.id}',
         headers={
             'Authorization': 'Bearer ' + token.access_token},
@@ -163,4 +166,5 @@ async def test_set_base_currency(
     currency_json = resp.json()
 
     assert {'id': currency.id, 'name': currency.name,
-            'code': currency.code, 'is_custom': False} == currency_json
+            'code': currency.code, 'is_custom': False,
+            'rate_to_base_currency': None} == currency_json

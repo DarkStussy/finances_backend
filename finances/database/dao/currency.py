@@ -19,7 +19,7 @@ class CurrencyDAO(BaseDAO[Currency]):
     async def get_all_by_user_id(self, user_id: uuid.UUID | None = None) \
             -> list[dto.Currency]:
         currencies = await self.session.execute(
-            select(Currency).where(Currency.user == user_id))
+            select(Currency).where(Currency.user_id == user_id))
         return [currency.to_dto() for currency in currencies.scalars().all()]
 
     async def create(self, currency_dto: dto.Currency) -> dto.Currency:
@@ -43,7 +43,7 @@ class CurrencyDAO(BaseDAO[Currency]):
     async def delete_by_id(self, currency_id: int, user_id: uuid.UUID) -> int:
         stmt = delete(Currency) \
             .where(Currency.id == currency_id,
-                   Currency.user == user_id) \
+                   Currency.user_id == user_id) \
             .returning(Currency.id)
         currency = await self.session.execute(stmt)
         await self.commit()

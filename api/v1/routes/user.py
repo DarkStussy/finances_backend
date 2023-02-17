@@ -3,7 +3,7 @@ from starlette import status
 
 from api.v1.dependencies import get_current_user, dao_provider, AuthProvider, \
     get_auth_provider
-from api.v1.models.user import UserCreate
+from api.v1.models.request.user import UserCreate
 from finances.database.dao.holder import DAO
 from finances.exceptions.user import UserException, UserExists
 from finances.models import dto
@@ -62,8 +62,7 @@ async def set_password_route(
 
 def user_router() -> APIRouter:
     router = APIRouter()
-    router.add_api_route('/me', get_user_route, methods=['GET'],
-                         response_model=dto.User)
+    router.add_api_route('/me', get_user_route, methods=['GET'])
     router.add_api_route('/signup', signup_route, methods=['POST'])
     router.add_api_route('/setusername', set_username_route, methods=['PUT'])
     router.add_api_route('/setpassword', set_password_route, methods=['PUT'])
