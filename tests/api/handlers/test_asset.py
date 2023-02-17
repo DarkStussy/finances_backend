@@ -117,7 +117,7 @@ async def test_change_asset(
         'id': str(asset.id)
     }
     resp = await client.put(
-        f'/api/v1/asset/change',
+        '/api/v1/asset/change',
         headers={
             'Authorization': 'Bearer ' + token.access_token},
         json=changed_asset
