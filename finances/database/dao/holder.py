@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from finances.database.dao.asset import AssetDAO
 from finances.database.dao.currency import CurrencyDAO
+from finances.database.dao.transaction_category import TransactionCategoryDAO
 from finances.database.dao.user import UserDAO
 
 
@@ -11,6 +12,7 @@ class DAO:
         self.user = UserDAO(self.session)
         self.currency = CurrencyDAO(self.session)
         self.asset = AssetDAO(self.session)
+        self.transaction_category = TransactionCategoryDAO(self.session)
 
     async def commit(self):
         await self.session.commit()

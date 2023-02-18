@@ -53,7 +53,7 @@ async def test_create_asset(
         'amount': 123
     }
     resp = await client.post(
-        '/api/v1/asset/create',
+        '/api/v1/asset/add',
         headers={
             'Authorization': 'Bearer ' + token.access_token},
         json=new_asset

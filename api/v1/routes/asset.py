@@ -10,7 +10,7 @@ from finances.database.dao import DAO
 from finances.exceptions.asset import AssetNotFound, AssetExists
 from finances.exceptions.currency import CurrencyNotFound
 from finances.models import dto
-from finances.services.asset import create_asset, get_asset_by_id, \
+from finances.services.asset import add_new_asset, get_asset_by_id, \
     change_asset, delete_asset
 
 
@@ -35,14 +35,14 @@ async def get_all_assets_route(
     return await dao.asset.get_all(current_user)
 
 
-async def create_asset_route(
+async def add_new_asset_route(
         asset: AssetCreate,
         current_user: dto.User = Depends(get_current_user),
         dao: DAO = Depends(dao_provider)
 ) -> AssetResponse:
     try:
-        asset_dto = await create_asset(asset.dict(), current_user, dao.asset,
-                                       dao.currency)
+        asset_dto = await add_new_asset(asset.dict(), current_user, dao.asset,
+                                        dao.currency)
     except CurrencyNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=e.message)
@@ -82,7 +82,7 @@ async def delete_asset_route(
 
 def asset_router() -> APIRouter:
     router = APIRouter()
-    router.add_api_route('/create', create_asset_route, methods=['POST'])
+    router.add_api_route('/add', add_new_asset_route, methods=['POST'])
     router.add_api_route('/change', change_asset_route, methods=['PUT'])
     router.add_api_route('/delete/{asset_id}', delete_asset_route,
                          methods=['DELETE'])

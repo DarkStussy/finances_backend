@@ -17,11 +17,9 @@ class Asset:
 
     @classmethod
     def from_dict(cls, dct: dict) -> Asset:
-        asset_id = dct.get('id')
-        user_id = dct.get('user_id')
         return Asset(
-            id=asset_id,
-            user_id=user_id,
+            id=dct.get('id'),
+            user_id=dct.get('user_id'),
             title=dct.get('title'),
             currency_id=dct.get('currency_id'),
             amount=dct.get('amount')

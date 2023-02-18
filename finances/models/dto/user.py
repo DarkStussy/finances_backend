@@ -15,7 +15,7 @@ class User:
     @classmethod
     def from_dict(cls, dct: dict) -> User:
         return User(
-            id=UUID(dct.get('id')),
+            id=dct.get('id'),
             username=dct.get('username'),
             user_type=UserType(dct.get('user_type'))
         )

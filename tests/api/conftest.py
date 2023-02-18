@@ -11,13 +11,15 @@ from api import v1
 from api.main_factory import create_app
 from api.v1.dependencies import AuthProvider
 from finances.database.dao import DAO
-from finances.database.models import Currency, Asset
+from finances.database.models import Currency, Asset, TransactionCategory
 from finances.exceptions.asset import AssetNotFound
+from finances.exceptions.transaction import TransactionCategoryNotFound
 from finances.exceptions.user import UserNotFound
 from finances.models import dto
 from finances.models.dto.config import Config
 from tests.fixtures.asset_data import get_test_asset
 from tests.fixtures.currency_data import get_test_currency
+from tests.fixtures.transaction_data import get_test_transaction_category
 from tests.fixtures.user_data import get_test_user
 
 
@@ -93,3 +95,19 @@ async def asset(dao: DAO, user: dto.User, currency: dto.Currency) -> dto.Asset:
         asset_ = asset_.to_dto(with_currency=False)
         asset_.currency = currency
     return asset_
+
+
+@pytest_asyncio.fixture
+async def transaction_category(dao: DAO,
+                               user: dto.User) -> dto.TransactionCategory:
+    category_dto = get_test_transaction_category()
+    try:
+        category = await dao.transaction_category.get_by_id(category_dto.id)
+    except TransactionCategoryNotFound:
+        category_dto.user_id = user.id
+        category = TransactionCategory.from_dto(category_dto)
+        category = await dao.session.merge(category)
+        category = category.to_dto()
+        await dao.commit()
+
+    return category

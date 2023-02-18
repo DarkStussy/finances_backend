@@ -16,13 +16,11 @@ class Currency:
 
     @classmethod
     def from_dict(cls, dct: dict) -> Currency:
-        rate = dct.get('rate_to_base_currency')
-        user_id = dct.get('user')
         return Currency(
             id=dct.get('id'),
             name=dct.get('name'),
             code=dct.get('code'),
             is_custom=dct.get('is_custom'),
-            rate_to_base_currency=Decimal(rate) if rate else None,
-            user_id=UUID(user_id) if user_id else user_id,
+            rate_to_base_currency=dct.get('rate_to_base_currency'),
+            user_id=dct.get('user'),
         )

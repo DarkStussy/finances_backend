@@ -38,6 +38,7 @@ async def test_auth(client: AsyncClient, user: dto.User):
     assert response.is_success
     response.read()
     actual_user = dto.User.from_dict(response.json())
+    user.id = str(user.id)
     assert user == actual_user
 
 

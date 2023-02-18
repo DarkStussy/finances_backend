@@ -12,6 +12,7 @@ from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
 
 from finances.database.functions import utcnow
 from finances.models import dto
+from finances.models.enums.transaction_type import TransactionType
 from finances.models.enums.user_type import UserType
 
 
@@ -43,6 +44,7 @@ class User(Base):
     @classmethod
     def from_dto(cls, user_dto: dto.UserWithCreds) -> User:
         return User(
+            id=user_dto.id,
             username=user_dto.username,
             password=user_dto.hashed_password,
             user_type=user_dto.user_type.value,
@@ -100,6 +102,7 @@ class Asset(Base):
     @classmethod
     def from_dto(cls, asset_dto: dto.Asset) -> Asset:
         return Asset(
+            id=asset_dto.id,
             user_id=asset_dto.user_id,
             title=asset_dto.title,
             currency_id=asset_dto.currency_id,
@@ -178,6 +181,24 @@ class TransactionCategory(Base):
         UniqueConstraint('title', 'type', 'user_id',
                          name='tran_category_unique'),
     )
+
+    def to_dto(self) -> dto.TransactionCategory:
+        return dto.TransactionCategory(
+            id=self.id,
+            title=self.title,
+            type=TransactionType(self.type),
+            user_id=self.user_id
+        )
+
+    @classmethod
+    def from_dto(cls, transaction_category_dto: dto.TransactionCategory) \
+            -> TransactionCategory:
+        return TransactionCategory(
+            id=transaction_category_dto.id,
+            title=transaction_category_dto.title,
+            type=transaction_category_dto.type.value,
+            user_id=transaction_category_dto.user_id
+        )
 
 
 class CryptoPortfolio(Base):

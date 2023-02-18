@@ -19,7 +19,7 @@ async def get_asset_by_id(
     return asset_dto
 
 
-async def create_asset(
+async def add_new_asset(
         asset: dict,
         user: dto.User,
         asset_dao: AssetDAO,
@@ -42,12 +42,12 @@ async def change_asset(
         asset_dao: AssetDAO,
         currency_dao: CurrencyDAO) -> dto.Asset:
     asset_dto = dto.Asset.from_dict(asset)
-    asset_dto.user_id = user.id
     currency_dto = await currency_dao.get_by_id(asset_dto.currency_id)
     if currency_dto is None or (
             currency_dto.is_custom and currency_dto.user_id != user.id):
         raise CurrencyNotFound
 
+    asset_dto.user_id = user.id
     changed_asset = await asset_dao.merge(asset_dto)
     changed_asset.currency = currency_dto
     return changed_asset
