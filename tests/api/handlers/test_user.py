@@ -10,7 +10,7 @@ from finances.models import dto
 async def test_signup_user(client: AsyncClient, dao: DAO, auth: AuthProvider):
     username = 'darkstussy'
     password = '123456!Xyz'
-    response = await client.post('/api/v1/users/signup', json={
+    response = await client.post('/api/v1/user/signup', json={
         'username': username,
         'password': password
     })
@@ -32,7 +32,7 @@ async def test_auth(client: AsyncClient, user: dto.User):
     access_token = response.json()['access_token']
 
     response = await client.get(
-        '/api/v1/users/me',
+        '/api/v1/user/me',
         headers={'Authorization': 'Bearer ' + access_token},
     )
     assert response.is_success
@@ -50,7 +50,7 @@ async def test_change_username(client: AsyncClient,
     token = auth.create_user_token(user)
     new_username = 'test12345'
     resp = await client.put(
-        '/api/v1/users/setusername',
+        '/api/v1/user/setusername',
         headers={'Authorization': 'Bearer ' + token.access_token},
         json={'username': new_username},
     )
@@ -59,7 +59,7 @@ async def test_change_username(client: AsyncClient,
     user.username = new_username
     token = auth.create_user_token(user)
     resp = await client.get(
-        '/api/v1/users/me',
+        '/api/v1/user/me',
         headers={'Authorization': 'Bearer ' + token.access_token},
     )
     assert resp.is_success
@@ -74,7 +74,7 @@ async def test_change_password(client: AsyncClient, user: dto.User,
                                auth: AuthProvider):
     token = auth.create_user_token(user)
     resp = await client.put(
-        '/api/v1/users/setpassword',
+        '/api/v1/user/setpassword',
         headers={'Authorization': 'Bearer ' + token.access_token},
         json={'password': 'test123!T'},
     )
