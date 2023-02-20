@@ -67,6 +67,7 @@ async def test_change_username(client: AsyncClient,
     assert user_json['username'] == user.username
 
     await dao.user.delete_by_id(user.id)
+    await dao.commit()
 
 
 @pytest.mark.asyncio

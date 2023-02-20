@@ -145,6 +145,7 @@ async def test_set_base_currency(
         dao: DAO
 ):
     currency = await dao.currency.create(get_test_base_currency())
+    await dao.commit()
 
     token = auth.create_user_token(user)
     resp = await client.put(

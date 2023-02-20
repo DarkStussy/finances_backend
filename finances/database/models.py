@@ -10,7 +10,6 @@ from sqlalchemy import String, Integer, ForeignKey, Numeric, Boolean, \
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
 
-from finances.database.functions import utcnow
 from finances.models import dto
 from finances.models.enums.transaction_type import TransactionType
 from finances.models.enums.user_type import UserType
@@ -81,6 +80,7 @@ class Asset(Base):
                                                         ondelete='SET NULL'),
                                              nullable=True)
     amount: Mapped[Decimal] = mapped_column(Numeric, default=0)
+    deleted: Mapped[bool] = mapped_column(Boolean, default=False)
 
     user: Mapped['User'] = relationship()
     currency: Mapped['Currency'] = relationship()
@@ -96,7 +96,8 @@ class Asset(Base):
             title=self.title,
             currency_id=self.currency_id,
             amount=self.amount,
-            currency=self.currency.to_dto() if with_currency else None
+            deleted=self.deleted,
+            currency=self.currency.to_dto() if with_currency else None,
         )
 
     @classmethod
@@ -106,7 +107,8 @@ class Asset(Base):
             user_id=asset_dto.user_id,
             title=asset_dto.title,
             currency_id=asset_dto.currency_id,
-            amount=asset_dto.amount
+            amount=asset_dto.amount,
+            deleted=asset_dto.deleted
         )
 
 
@@ -155,15 +157,44 @@ class Transaction(Base):
                                                ForeignKey('user.id',
                                                           ondelete='CASCADE'),
                                                nullable=False)
-    asset: Mapped[str] = mapped_column(String, nullable=False)
-    category: Mapped[str] = mapped_column(String, nullable=False)
-    type: Mapped[str] = mapped_column(String, nullable=False)
+    asset_id: Mapped[uuid.UUID] = mapped_column(UUID,
+                                                ForeignKey('asset.id',
+                                                           ondelete='CASCADE'),
+                                                nullable=False)
+    category_id: Mapped[int] = mapped_column(Integer,
+                                             ForeignKey(
+                                                 'transaction_category.id',
+                                                 ondelete='CASCADE'),
+                                             nullable=False)
     amount: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
-    created: Mapped[datetime] = mapped_column(DateTime(timezone=True),
-                                              default=utcnow())
-    updated: Mapped[datetime] = mapped_column(DateTime(timezone=True),
-                                              default=utcnow(),
-                                              onupdate=utcnow())
+    created: Mapped[datetime] = mapped_column(DateTime)
+
+    asset: Mapped['Asset'] = relationship()
+    category: Mapped['TransactionCategory'] = relationship()
+
+    def to_dto(self, with_asset: bool = True,
+               with_category: bool = True) -> dto.Transaction:
+        return dto.Transaction(
+            id=self.id,
+            user_id=self.user_id,
+            asset_id=self.asset_id,
+            category_id=self.category_id,
+            amount=self.amount,
+            created=self.created,
+            asset=self.asset.to_dto() if with_asset else None,
+            category=self.category.to_dto() if with_category else None
+        )
+
+    @classmethod
+    def from_dto(cls, transaction_dto: dto.Transaction) -> Transaction:
+        return Transaction(
+            id=transaction_dto.id,
+            user_id=transaction_dto.user_id,
+            asset_id=transaction_dto.asset_id,
+            category_id=transaction_dto.category_id,
+            amount=transaction_dto.amount,
+            created=transaction_dto.created
+        )
 
 
 class TransactionCategory(Base):
@@ -176,6 +207,7 @@ class TransactionCategory(Base):
                                                ForeignKey('user.id',
                                                           ondelete='CASCADE'),
                                                nullable=False)
+    deleted: Mapped[bool] = mapped_column(Boolean, default=False)
 
     __table_args__ = (
         UniqueConstraint('title', 'type', 'user_id',
@@ -187,7 +219,8 @@ class TransactionCategory(Base):
             id=self.id,
             title=self.title,
             type=TransactionType(self.type),
-            user_id=self.user_id
+            user_id=self.user_id,
+            deleted=self.deleted
         )
 
     @classmethod
@@ -197,7 +230,8 @@ class TransactionCategory(Base):
             id=transaction_category_dto.id,
             title=transaction_category_dto.title,
             type=transaction_category_dto.type.value,
-            user_id=transaction_category_dto.user_id
+            user_id=transaction_category_dto.user_id,
+            deleted=transaction_category_dto.deleted
         )
 
 
@@ -244,8 +278,4 @@ class CryptoPortfolioTransaction(Base):
         ForeignKey('crypto_currency.id', ondelete='CASCADE'),
         nullable=False)
     amount: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
-    created: Mapped[datetime] = mapped_column(DateTime(timezone=True),
-                                              default=utcnow())
-    updated: Mapped[datetime] = mapped_column(DateTime(timezone=True),
-                                              default=utcnow(),
-                                              onupdate=utcnow())
+    created: Mapped[datetime] = mapped_column(DateTime)

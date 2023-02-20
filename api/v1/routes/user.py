@@ -26,6 +26,7 @@ async def signup_route(
                               hashed_password=auth_provider.get_password_hash(
                                   user_create.password),
                               user_type=UserType.USER))
+        await dao.commit()
     except UserException as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=e.message)
@@ -60,7 +61,7 @@ async def set_password_route(
     raise HTTPException(status_code=status.HTTP_200_OK)
 
 
-def user_router() -> APIRouter:
+def get_user_router() -> APIRouter:
     router = APIRouter()
     router.add_api_route('/me', get_user_route, methods=['GET'])
     router.add_api_route('/signup', signup_route, methods=['POST'])

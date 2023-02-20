@@ -61,7 +61,7 @@ async def change_asset_route(
     try:
         asset_dto = await change_asset(asset.dict(), current_user, dao.asset,
                                        dao.currency)
-    except CurrencyNotFound as e:
+    except (CurrencyNotFound, AssetNotFound) as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=e.message)
     return AssetResponse.from_dto(asset_dto)
@@ -80,7 +80,7 @@ async def delete_asset_route(
     raise HTTPException(status_code=status.HTTP_200_OK)
 
 
-def asset_router() -> APIRouter:
+def get_asset_router() -> APIRouter:
     router = APIRouter()
     router.add_api_route('/add', add_new_asset_route, methods=['POST'])
     router.add_api_route('/change', change_asset_route, methods=['PUT'])

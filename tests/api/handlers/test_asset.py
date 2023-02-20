@@ -136,6 +136,7 @@ async def test_change_asset(
     assert changed_asset == asset_json
 
     await dao.asset.delete_by_id(asset.id, user.id)
+    await dao.commit()
 
 
 @pytest.mark.asyncio
@@ -172,3 +173,4 @@ async def test_delete_asset_currency(
     assert asset_dict == asset_json
 
     await dao.asset.delete_by_id(asset.id, user.id)
+    await dao.commit()

@@ -8,19 +8,21 @@ from finances.database.dao import DAO
 from finances.exceptions.currency import CurrencyNotFound, CurrencyCantBeBase
 from finances.models import dto
 from finances.services.currency import add_new_currency, change_currency, \
-    delete_currency, set_base_currency
+    delete_currency, set_base_currency, get_currency_by_id
 
 
 async def get_currency_by_id_route(
         currency_id: int,
         current_user: dto.User = Depends(get_current_user),
         dao: DAO = Depends(dao_provider)) -> CurrencyResponse:
-    currency = await dao.currency.get_by_id(currency_id)
-    if currency is None or \
-            currency.is_custom and currency.user_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-
-    return CurrencyResponse.from_dto(currency)
+    try:
+        currency_dto = await get_currency_by_id(currency_id, current_user,
+                                                dao.currency)
+    except CurrencyNotFound as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=e.message)
+    else:
+        return CurrencyResponse.from_dto(currency_dto)
 
 
 async def add_new_currency_route(
@@ -101,7 +103,7 @@ async def set_base_currency_route(
         raise HTTPException(status_code=status.HTTP_200_OK)
 
 
-def currency_router() -> APIRouter:
+def get_currency_router() -> APIRouter:
     router = APIRouter()
     router.add_api_route('/add', add_new_currency_route,
                          methods=['POST'])

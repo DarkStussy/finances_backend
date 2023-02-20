@@ -13,6 +13,7 @@ from api.v1.dependencies import AuthProvider
 from finances.database.dao import DAO
 from finances.database.models import Currency, Asset, TransactionCategory
 from finances.exceptions.asset import AssetNotFound
+from finances.exceptions.currency import CurrencyNotFound
 from finances.exceptions.transaction import TransactionCategoryNotFound
 from finances.exceptions.user import UserNotFound
 from finances.models import dto
@@ -56,28 +57,30 @@ async def user(dao: DAO, auth: AuthProvider) -> dto.User:
     except UserNotFound:
         password = auth.get_password_hash('12345')
         user_ = await dao.user.create(test_user.add_password(password))
+        await dao.commit()
     return user_
 
 
 @pytest_asyncio.fixture
 async def currency(dao: DAO, user: dto.User) -> dto.Currency:
     curr_dto = get_test_currency()
-    curr = await dao.currency.get_by_id(curr_dto.id)
-    if curr:
-        return curr
-
-    curr = await dao.session.merge(
-        Currency(
-            id=curr_dto.id,
-            name=curr_dto.name,
-            code=curr_dto.code,
-            is_custom=True,
-            rate_to_base_currency=Decimal('0.1'),
-            user_id=user.id,
+    try:
+        curr = await dao.currency.get_by_id(curr_dto.id)
+    except CurrencyNotFound:
+        curr = await dao.session.merge(
+            Currency(
+                id=curr_dto.id,
+                name=curr_dto.name,
+                code=curr_dto.code,
+                is_custom=True,
+                rate_to_base_currency=Decimal('0.1'),
+                user_id=user.id,
+            )
         )
-    )
-    await dao.commit()
-    return curr.to_dto()
+        await dao.commit()
+        return curr.to_dto()
+    else:
+        return curr
 
 
 @pytest_asyncio.fixture

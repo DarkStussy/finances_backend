@@ -12,6 +12,7 @@ class TransactionCategory:
     title: str | None
     type: TransactionType | None
     user_id: UUID | None
+    deleted: bool = False
 
     @classmethod
     def from_dict(cls, dct: dict) -> TransactionCategory:

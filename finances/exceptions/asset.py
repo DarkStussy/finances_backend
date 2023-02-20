@@ -1,16 +1,21 @@
-class AssetException(Exception):
+from finances.exceptions.base import FinancesBaseException
+
+
+class AssetException(FinancesBaseException):
     def __init__(self, msg: str = 'Some currency exception'):
-        self.message = msg
         super().__init__(msg)
 
 
 class AssetExists(AssetException):
-    def __init__(self, msg: str = 'Asset already exists'):
-        self.message = msg
-        super().__init__(msg)
+    def __init__(self):
+        super().__init__('Asset already exists')
 
 
 class AssetNotFound(AssetException):
-    def __init__(self, msg: str = 'Asset not found'):
-        self.message = msg
-        super().__init__(msg)
+    def __init__(self):
+        super().__init__('Asset not found')
+
+
+class AssetCantBeDeleted(AssetException):
+    def __init__(self):
+        super().__init__('Asset cant be deleted')

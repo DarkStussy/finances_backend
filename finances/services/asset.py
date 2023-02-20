@@ -27,11 +27,11 @@ async def add_new_asset(
     asset_dto = dto.Asset.from_dict(asset)
     asset_dto.user_id = user.id
     currency_dto = await currency_dao.get_by_id(asset_dto.currency_id)
-    if currency_dto is None or (
-            currency_dto.is_custom and currency_dto.user_id != user.id):
+    if currency_dto.is_custom and currency_dto.user_id != user.id:
         raise CurrencyNotFound
 
     created_asset = await asset_dao.create(asset_dto)
+    await asset_dao.commit()
     created_asset.currency = currency_dto
     return created_asset
 
@@ -41,14 +41,18 @@ async def change_asset(
         user: dto.User,
         asset_dao: AssetDAO,
         currency_dao: CurrencyDAO) -> dto.Asset:
-    asset_dto = dto.Asset.from_dict(asset)
-    currency_dto = await currency_dao.get_by_id(asset_dto.currency_id)
-    if currency_dto is None or (
-            currency_dto.is_custom and currency_dto.user_id != user.id):
+    changed_asset_dto = dto.Asset.from_dict(asset)
+    currency_dto = await currency_dao.get_by_id(changed_asset_dto.currency_id)
+    if currency_dto.is_custom and currency_dto.user_id != user.id:
         raise CurrencyNotFound
 
-    asset_dto.user_id = user.id
-    changed_asset = await asset_dao.merge(asset_dto)
+    asset_dto = await asset_dao.get_by_id(changed_asset_dto.id)
+    if asset_dto.user_id != user.id:
+        raise AssetNotFound
+
+    changed_asset_dto.user_id = user.id
+    changed_asset = await asset_dao.merge(changed_asset_dto)
+    await asset_dao.commit()
     changed_asset.currency = currency_dto
     return changed_asset
 
@@ -58,6 +62,10 @@ async def delete_asset(
         user: dto.User,
         asset_dao: AssetDAO,
 ):
-    deleted_asset_id = await asset_dao.delete_by_id(asset_id, user.id)
-    if deleted_asset_id is None:
+    deleted_asset_dto = await asset_dao.get_by_id(asset_id)
+    if deleted_asset_dto.user_id != user.id:
         raise AssetNotFound
+
+    deleted_asset_dto.deleted = True
+    await asset_dao.merge(deleted_asset_dto)
+    await asset_dao.commit()

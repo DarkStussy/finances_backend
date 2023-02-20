@@ -96,7 +96,7 @@ async def delete_transaction_category_route(
     raise HTTPException(status_code=status.HTTP_200_OK)
 
 
-def transaction_category_router() -> APIRouter:
+def get_transaction_category_router() -> APIRouter:
     router = APIRouter()
     router.add_api_route('/add', add_transaction_category_route,
                          methods=['POST'])

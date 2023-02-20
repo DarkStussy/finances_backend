@@ -1,18 +1,16 @@
-class CurrencyException(Exception):
+from finances.exceptions.base import FinancesBaseException
+
+
+class CurrencyException(FinancesBaseException):
     def __init__(self, msg: str = 'Some currency exception'):
-        self.message = msg
         super().__init__(msg)
 
 
 class CurrencyNotFound(CurrencyException):
-    def __init__(self,
-                 msg: str = 'Currency not found'):
-        self.message = msg
-        super().__init__(msg)
+    def __init__(self):
+        super().__init__('Currency not found')
 
 
 class CurrencyCantBeBase(CurrencyException):
-    def __init__(self,
-                 msg: str = 'Currency cannot be base'):
-        self.message = msg
-        super().__init__(msg)
+    def __init__(self):
+        super().__init__('Currency cannot be base')

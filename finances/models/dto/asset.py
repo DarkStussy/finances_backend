@@ -13,6 +13,7 @@ class Asset:
     title: str | None
     currency_id: int | None
     amount: Decimal | None
+    deleted: bool = False
     currency: Currency | None = None
 
     @classmethod

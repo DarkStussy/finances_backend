@@ -17,7 +17,7 @@ class TransactionCategoryDAO(BaseDAO[TransactionCategory]):
 
     async def get_by_id(self, category_id: int) -> dto.TransactionCategory:
         category = await self._get_by_id(category_id)
-        if category is None:
+        if category is None or category.deleted:
             raise TransactionCategoryNotFound
         return category.to_dto()
 
@@ -25,7 +25,9 @@ class TransactionCategoryDAO(BaseDAO[TransactionCategory]):
                       transaction_type: str | None = None) \
             -> list[dto.TransactionCategory]:
         stmt = select(TransactionCategory).where(
-            TransactionCategory.user_id == user_dto.id)
+            TransactionCategory.user_id == user_dto.id,
+            TransactionCategory.deleted.__eq__(False)
+        )
         if transaction_type:
             stmt = stmt.where(TransactionCategory.type == transaction_type)
 
@@ -35,33 +37,25 @@ class TransactionCategoryDAO(BaseDAO[TransactionCategory]):
 
     async def create(self, transaction_category_dto: dto.TransactionCategory) \
             -> dto.TransactionCategory:
+        transaction_category = TransactionCategory.from_dto(
+            transaction_category_dto)
+        self.save(transaction_category)
         try:
-            transaction_category = TransactionCategory.from_dto(
-                transaction_category_dto)
-            self.save(transaction_category)
-            await self.commit()
+            await self._flush(transaction_category)
         except IntegrityError as e:
-            if e.code == 'gkpj':
-                await self.session.rollback()
-                raise TransactionCategoryExists from e
+            raise TransactionCategoryExists from e
         else:
             return transaction_category.to_dto()
 
     async def merge(self, category_dto: dto.TransactionCategory) \
             -> dto.TransactionCategory:
+        category = await self.session.merge(
+            TransactionCategory.from_dto(category_dto)
+        )
         try:
-            category = await self.session.merge(
-                TransactionCategory(
-                    id=category_dto.id,
-                    title=category_dto.title,
-                    type=category_dto.type.value
-                )
-            )
-            await self.commit()
+            await self._flush(category)
         except IntegrityError as e:
-            if e.code == 'gkpj':
-                await self.session.rollback()
-                raise TransactionCategoryExists from e
+            raise TransactionCategoryExists from e
         else:
             return category.to_dto()
 

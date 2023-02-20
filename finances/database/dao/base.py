@@ -32,7 +32,7 @@ class BaseDAO(Generic[Model]):
     async def delete_all(self):
         await self.session.execute(delete(self.model))
 
-    async def flush(self, *objects):
+    async def _flush(self, *objects):
         await self.session.flush(objects)
 
     async def count(self):

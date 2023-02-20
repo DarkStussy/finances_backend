@@ -36,16 +36,14 @@ class UserDAO(BaseDAO[User]):
             return user
 
     async def create(self, user_dto: dto.UserWithCreds) -> dto.User:
+        user = User.from_dto(user_dto)
+        config = UserConfiguration(id=user.id)
+        user.config = config
+        self.save(user)
         try:
-            user = User.from_dto(user_dto)
-            config = UserConfiguration(id=user.id)
-            user.config = config
-            self.save(user)
-            await self.commit()
+            await self._flush(user)
         except IntegrityError as e:
-            if e.code == 'gkpj':
-                await self.session.rollback()
-                raise UserExists from e
+            raise UserExists from e
         else:
             return user.to_dto()
 
@@ -67,7 +65,6 @@ class UserDAO(BaseDAO[User]):
         config = await self.session.get(UserConfiguration, user.id)
         config.base_currency_id = currency_id
         await self.session.merge(config)
-        await self.commit()
 
     async def delete_by_id(self, id_: UUID):
         await self.session.execute(delete(User).where(User.id == id_))

@@ -7,7 +7,8 @@ from sqlalchemy.orm import joinedload
 
 from finances.database.dao import BaseDAO
 from finances.database.models import Asset
-from finances.exceptions.asset import AssetExists, AssetNotFound
+from finances.exceptions.asset import AssetExists, AssetNotFound, \
+    AssetCantBeDeleted
 from finances.models import dto
 
 
@@ -17,7 +18,7 @@ class AssetDAO(BaseDAO[Asset]):
 
     async def get_by_id(self, asset_id: UUID) -> dto.Asset:
         asset = await self._get_by_id(asset_id, [joinedload(Asset.currency)])
-        if asset is None:
+        if asset is None or asset.deleted:
             raise AssetNotFound
         if asset.currency_id:
             return asset.to_dto()
@@ -26,34 +27,30 @@ class AssetDAO(BaseDAO[Asset]):
 
     async def get_all(self, user_dto: dto.User) -> list[dto.Asset]:
         result = await self.session.execute(
-            select(Asset).where(Asset.user_id == user_dto.id).options(
+            select(Asset).where(Asset.user_id == user_dto.id,
+                                Asset.deleted.__eq__(False)).options(
                 joinedload(Asset.currency))
         )
         return [asset.to_dto(with_currency=bool(asset.currency_id)) for asset
                 in result.scalars().all()]
 
     async def create(self, asset_dto: dto.Asset) -> dto.Asset:
+        asset = Asset.from_dto(asset_dto)
+        self.save(asset)
         try:
-            asset = Asset.from_dto(asset_dto)
-            self.save(asset)
-            await self.commit()
+            await self._flush(asset)
         except IntegrityError as e:
-            if e.code == 'gkpj':
-                await self.session.rollback()
-                raise AssetExists from e
+            raise AssetExists from e
         else:
             return asset.to_dto(with_currency=False)
 
     async def merge(self, asset_dto: dto.Asset) -> dto.Asset:
+        asset = Asset.from_dto(asset_dto)
         try:
-            asset = Asset.from_dto(asset_dto)
-            asset.id = asset_dto.id
-            await self.session.merge(asset)
-            await self.commit()
+            asset = await self.session.merge(asset)
+            await self._flush(asset)
         except IntegrityError as e:
-            if e.code == 'gkpj':
-                await self.session.rollback()
-                raise AssetExists from e
+            raise AssetExists from e
         else:
             return asset.to_dto(with_currency=False)
 
@@ -62,6 +59,9 @@ class AssetDAO(BaseDAO[Asset]):
             .where(Asset.id == asset_id,
                    Asset.user_id == user_id) \
             .returning(Asset.id)
-        currency = await self.session.execute(stmt)
-        await self.commit()
-        return currency.scalar()
+        asset = await self.session.execute(stmt)
+        try:
+            await self._flush(asset)
+        except IntegrityError as e:
+            raise AssetCantBeDeleted from e
+        return asset.scalar()
