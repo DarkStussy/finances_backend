@@ -10,5 +10,5 @@ def get_test_asset() -> dto.Asset:
         title='test asset',
         user_id=None,
         currency_id=None,
-        amount=Decimal('10.2')
+        amount=Decimal('10')
     )

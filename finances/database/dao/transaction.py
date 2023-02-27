@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from finances.database.dao import BaseDAO
-from finances.database.models import Transaction, Asset
+from finances.database.models import Transaction, Asset, TransactionCategory
 from finances.exceptions.transaction import AddTransactionError, \
     TransactionNotFound, MergeTransactionError, TransactionCantBeDeleted
 from finances.models import dto
@@ -25,13 +25,20 @@ class TransactionDAO(BaseDAO[Transaction]):
             raise TransactionNotFound
         return transaction.to_dto()
 
-    async def get_all(self, user_dto: dto.User) -> list[dto.Transaction]:
-        result = await self.session.execute(
-            select(Transaction).where(Transaction.user_id == user_dto.id)
-            .order_by(Transaction.created.desc(), Transaction.id.desc())
+    async def get_all(
+            self,
+            user_dto: dto.User,
+            transaction_type: str | None = None
+    ) -> list[dto.Transaction]:
+        stmt = select(Transaction).where(Transaction.user_id == user_dto.id) \
+            .order_by(Transaction.created.desc(), Transaction.id.desc()) \
             .options(joinedload(Transaction.asset).joinedload(Asset.currency),
                      joinedload(Transaction.category))
-        )
+        if transaction_type:
+            stmt = stmt.where(Transaction.category.has(
+                TransactionCategory.type == transaction_type))
+
+        result = await self.session.execute(stmt)
         return [transaction.to_dto() for transaction in result.scalars().all()]
 
     async def create(self, transaction_dto: dto.Transaction) \

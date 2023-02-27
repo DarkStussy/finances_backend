@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from starlette import status
 
 from api.v1.dependencies import get_current_user, dao_provider
@@ -11,6 +11,7 @@ from finances.exceptions.transaction import TransactionCategoryNotFound, \
     AddTransactionError, TransactionNotFound, MergeTransactionError, \
     TransactionCantBeChanged, TransactionCantBeDeleted
 from finances.models import dto
+from finances.models.enums.transaction_type import TransactionType
 from finances.services.transaction import add_transaction, \
     get_transaction_by_id, change_transaction, delete_transaction
 
@@ -19,7 +20,7 @@ async def get_transaction_by_id_route(
         transaction_id: int,
         current_user: dto.User = Depends(get_current_user),
         dao: DAO = Depends(dao_provider)
-):
+) -> TransactionResponse:
     try:
         transaction_dto = await get_transaction_by_id(transaction_id,
                                                       current_user,
@@ -32,10 +33,14 @@ async def get_transaction_by_id_route(
 
 
 async def get_all_transactions_route(
+        transaction_type: TransactionType = Query(default=None, alias='type'),
         current_user: dto.User = Depends(get_current_user),
         dao: DAO = Depends(dao_provider)
 ) -> list[TransactionResponse]:
-    return await dao.transaction.get_all(current_user)
+    return await dao.transaction.get_all(
+        current_user,
+        transaction_type.value if transaction_type else None
+    )
 
 
 async def add_transaction_route(

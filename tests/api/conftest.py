@@ -1,4 +1,5 @@
 from _decimal import Decimal
+from datetime import datetime
 from typing import AsyncGenerator
 
 import pytest
@@ -14,7 +15,8 @@ from finances.database.dao import DAO
 from finances.database.models import Currency, Asset, TransactionCategory
 from finances.exceptions.asset import AssetNotFound
 from finances.exceptions.currency import CurrencyNotFound
-from finances.exceptions.transaction import TransactionCategoryNotFound
+from finances.exceptions.transaction import TransactionCategoryNotFound, \
+    TransactionNotFound
 from finances.exceptions.user import UserNotFound
 from finances.models import dto
 from finances.models.dto.config import Config
@@ -114,3 +116,29 @@ async def transaction_category(dao: DAO,
         await dao.commit()
 
     return category
+
+
+@pytest_asyncio.fixture
+async def transaction(
+        dao: DAO,
+        user: dto.User,
+        asset: dto.Asset,
+        transaction_category: dto.TransactionCategory
+) -> dto.Transaction:
+    try:
+        transaction_dto = await dao.transaction.get_by_id(1)
+    except TransactionNotFound:
+        transaction_dto = dto.Transaction(
+            id=1,
+            user_id=user.id,
+            asset_id=asset.id,
+            category_id=transaction_category.id,
+            amount=Decimal('5.0'),
+            created=datetime.now()
+        )
+        transaction_dto = await dao.transaction.merge(transaction_dto)
+        await dao.commit()
+        transaction_dto.asset = asset
+        transaction_dto.category = transaction_category
+
+    return transaction_dto
