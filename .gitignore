@@ -1,0 +1,4 @@
+.env
+alembic.ini
+finances/database/migrations
+.idea
