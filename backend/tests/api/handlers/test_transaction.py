@@ -3,10 +3,10 @@ from _decimal import Decimal
 import pytest
 from httpx import AsyncClient
 
-from api.v1.dependencies import AuthProvider
-from finances.database.dao import DAO
-from finances.exceptions.transaction import TransactionNotFound
-from finances.models import dto
+from backend.api.v1.dependencies import AuthProvider
+from backend.finances.database.dao import DAO
+from backend.finances.exceptions.transaction import TransactionNotFound
+from backend.finances.models import dto
 
 
 @pytest.mark.asyncio
@@ -165,7 +165,7 @@ async def test_change_transaction(
         'id': transaction.id
     }
     resp = await client.put(
-        f'/api/v1/transaction/change',
+        '/api/v1/transaction/change',
         headers={
             'Authorization': 'Bearer ' + token.access_token},
         json=changed_transaction_dict

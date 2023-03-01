@@ -1,6 +1,6 @@
-from finances.database.dao import UserDAO
-from finances.exceptions.user import UserNotFound, UserExists
-from finances.models import dto
+from backend.finances.database.dao import UserDAO
+from backend.finances.exceptions.user import UserNotFound, UserExists
+from backend.finances.models import dto
 
 
 async def set_username(user: dto.User,

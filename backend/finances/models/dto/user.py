@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from uuid import UUID
 
-from finances.models.enums.user_type import UserType
+from backend.finances.models.enums.user_type import UserType
 
 
 @dataclass

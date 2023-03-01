@@ -3,14 +3,14 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
 
-from api.v1.dependencies import get_current_user, dao_provider
-from api.v1.models.request.asset import AssetCreate, AssetChange
-from api.v1.models.response.asset import AssetResponse
-from finances.database.dao import DAO
-from finances.exceptions.asset import AssetNotFound, AssetExists
-from finances.exceptions.currency import CurrencyNotFound
-from finances.models import dto
-from finances.services.asset import add_new_asset, get_asset_by_id, \
+from backend.api.v1.dependencies import get_current_user, dao_provider
+from backend.api.v1.models.request.asset import AssetCreate, AssetChange
+from backend.api.v1.models.response.asset import AssetResponse
+from backend.finances.database.dao import DAO
+from backend.finances.exceptions.asset import AssetNotFound, AssetExists
+from backend.finances.exceptions.currency import CurrencyNotFound
+from backend.finances.models import dto
+from backend.finances.services.asset import add_new_asset, get_asset_by_id, \
     change_asset, delete_asset
 
 

@@ -4,10 +4,10 @@ from _decimal import Decimal
 import pytest
 from httpx import AsyncClient
 
-from api.v1.dependencies import AuthProvider
-from finances.database.dao import DAO
-from finances.models import dto
-from tests.fixtures.currency_data import get_test_currency, \
+from backend.api.v1.dependencies import AuthProvider
+from backend.finances.database.dao import DAO
+from backend.finances.models import dto
+from backend.tests.fixtures.currency_data import get_test_currency, \
     get_test_base_currency
 
 

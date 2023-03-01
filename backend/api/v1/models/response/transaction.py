@@ -4,7 +4,7 @@ from _decimal import Decimal
 from dataclasses import dataclass
 from datetime import datetime
 
-from finances.models import dto
+from backend.finances.models import dto
 
 from .asset import AssetResponse
 from .transaction_category import TransactionCategoryResponse

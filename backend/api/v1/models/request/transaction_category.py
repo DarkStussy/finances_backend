@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from finances.models.enums.transaction_type import TransactionType
+from backend.finances.models.enums.transaction_type import TransactionType
 
 
 class TransactionCategoryCreate(BaseModel):

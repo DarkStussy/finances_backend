@@ -1,9 +1,9 @@
 import pytest
 from httpx import AsyncClient
 
-from api.v1.dependencies import AuthProvider
-from finances.database.dao import DAO
-from finances.models import dto
+from backend.api.v1.dependencies import AuthProvider
+from backend.finances.database.dao import DAO
+from backend.finances.models import dto
 
 
 @pytest.mark.asyncio

@@ -1,8 +1,8 @@
 import pytest
 from httpx import AsyncClient
 
-from api.v1.dependencies import AuthProvider
-from finances.models import dto
+from backend.api.v1.dependencies import AuthProvider
+from backend.finances.models import dto
 
 
 @pytest.mark.asyncio

@@ -5,11 +5,12 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from finances.database.dao import BaseDAO
-from finances.database.models import Transaction, Asset, TransactionCategory
-from finances.exceptions.transaction import AddTransactionError, \
+from backend.finances.database.dao import BaseDAO
+from backend.finances.database.models import Transaction, Asset, \
+    TransactionCategory
+from backend.finances.exceptions.transaction import AddTransactionError, \
     TransactionNotFound, MergeTransactionError, TransactionCantBeDeleted
-from finances.models import dto
+from backend.finances.models import dto
 
 
 class TransactionDAO(BaseDAO[Transaction]):

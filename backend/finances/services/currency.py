@@ -1,7 +1,8 @@
-from finances.database.dao import DAO
-from finances.database.dao.currency import CurrencyDAO
-from finances.exceptions.currency import CurrencyNotFound, CurrencyCantBeBase
-from finances.models import dto
+from backend.finances.database.dao import DAO
+from backend.finances.database.dao.currency import CurrencyDAO
+from backend.finances.exceptions.currency import CurrencyNotFound, \
+    CurrencyCantBeBase
+from backend.finances.models import dto
 
 
 async def get_currency_by_id(

@@ -1,4 +1,4 @@
-from finances.models import dto
+from backend.finances.models import dto
 
 
 def get_test_currency() -> dto.Currency:

@@ -1,17 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from starlette import status
 
-from api.v1.dependencies import get_current_user, dao_provider
-from api.v1.models.request.transaction_category import \
+from backend.api.v1.dependencies import get_current_user, dao_provider
+from backend.api.v1.models.request.transaction_category import \
     TransactionCategoryCreate, TransactionCategoryChange
-from api.v1.models.response.transaction_category import \
+from backend.api.v1.models.response.transaction_category import \
     TransactionCategoryResponse
-from finances.database.dao import DAO
-from finances.exceptions.transaction import TransactionCategoryExists, \
-    TransactionCategoryNotFound
-from finances.models import dto
-from finances.models.enums.transaction_type import TransactionType
-from finances.services.transaction import add_transaction_category, \
+from backend.finances.database.dao import DAO
+from backend.finances.exceptions.transaction import \
+    TransactionCategoryExists, TransactionCategoryNotFound
+from backend.finances.models import dto
+from backend.finances.models.enums.transaction_type import TransactionType
+from backend.finances.services.transaction import add_transaction_category, \
     get_transaction_category_by_id, change_transaction_category, \
     delete_transaction_category
 

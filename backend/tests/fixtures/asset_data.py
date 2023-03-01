@@ -1,7 +1,7 @@
 from _decimal import Decimal
 from uuid import UUID
 
-from finances.models import dto
+from backend.finances.models import dto
 
 
 def get_test_asset() -> dto.Asset:

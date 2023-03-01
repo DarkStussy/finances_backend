@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from finances.models import dto
-from finances.models.enums.transaction_type import TransactionType
+from backend.finances.models import dto
+from backend.finances.models.enums.transaction_type import TransactionType
 
 
 @dataclass

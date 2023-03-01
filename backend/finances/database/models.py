@@ -10,9 +10,9 @@ from sqlalchemy import String, Integer, ForeignKey, Numeric, Boolean, \
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
 
-from finances.models import dto
-from finances.models.enums.transaction_type import TransactionType
-from finances.models.enums.user_type import UserType
+from backend.finances.models import dto
+from backend.finances.models.enums.transaction_type import TransactionType
+from backend.finances.models.enums.user_type import UserType
 
 
 class Base(DeclarativeBase):

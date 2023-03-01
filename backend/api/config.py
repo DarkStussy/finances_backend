@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from dotenv import load_dotenv
 
-from finances.models.dto import Config, DatabaseConfig, AuthConfig
+from backend.finances.models.dto import Config, DatabaseConfig, AuthConfig
 
 
 def load_config() -> Config:

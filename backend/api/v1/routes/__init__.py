@@ -1,10 +1,11 @@
 from fastapi import APIRouter
 
-from api.v1.routes.asset import get_asset_router
-from api.v1.routes.currency import get_currency_router
-from api.v1.routes.transaction_category import get_transaction_category_router
-from api.v1.routes.user import get_user_router
-from api.v1.routes.transaction import get_transaction_router
+from backend.api.v1.routes.asset import get_asset_router
+from backend.api.v1.routes.currency import get_currency_router
+from backend.api.v1.routes.transaction_category import \
+    get_transaction_category_router
+from backend.api.v1.routes.user import get_user_router
+from backend.api.v1.routes.transaction import get_transaction_router
 
 
 def setup_routers(api_router: APIRouter):

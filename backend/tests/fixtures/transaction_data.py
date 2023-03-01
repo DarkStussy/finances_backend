@@ -1,5 +1,5 @@
-from finances.models import dto
-from finances.models.enums.transaction_type import TransactionType
+from backend.finances.models import dto
+from backend.finances.models.enums.transaction_type import TransactionType
 
 
 def get_test_transaction_category() -> dto.TransactionCategory:

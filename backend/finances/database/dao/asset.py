@@ -5,11 +5,11 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from finances.database.dao import BaseDAO
-from finances.database.models import Asset
-from finances.exceptions.asset import AssetExists, AssetNotFound, \
+from backend.finances.database.dao import BaseDAO
+from backend.finances.database.models import Asset
+from backend.finances.exceptions.asset import AssetExists, AssetNotFound, \
     AssetCantBeDeleted
-from finances.models import dto
+from backend.finances.models import dto
 
 
 class AssetDAO(BaseDAO[Asset]):

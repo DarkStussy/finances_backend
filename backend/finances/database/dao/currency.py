@@ -3,10 +3,10 @@ import uuid
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from finances.database.dao import BaseDAO
-from finances.database.models import Currency
-from finances.exceptions.currency import CurrencyNotFound
-from finances.models import dto
+from backend.finances.database.dao import BaseDAO
+from backend.finances.database.models import Currency
+from backend.finances.exceptions.currency import CurrencyNotFound
+from backend.finances.models import dto
 
 
 class CurrencyDAO(BaseDAO[Currency]):

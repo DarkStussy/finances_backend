@@ -1,10 +1,10 @@
 from uuid import UUID
 
-from finances.database.dao.asset import AssetDAO
-from finances.database.dao.currency import CurrencyDAO
-from finances.exceptions.asset import AssetNotFound
-from finances.exceptions.currency import CurrencyNotFound
-from finances.models import dto
+from backend.finances.database.dao.asset import AssetDAO
+from backend.finances.database.dao.currency import CurrencyDAO
+from backend.finances.exceptions.asset import AssetNotFound
+from backend.finances.exceptions.currency import CurrencyNotFound
+from backend.finances.models import dto
 
 
 async def get_asset_by_id(

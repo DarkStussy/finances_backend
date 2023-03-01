@@ -6,12 +6,12 @@ from jose import jwt, JWTError
 from passlib.context import CryptContext
 from starlette import status
 
-from api.v1.dependencies.db import dao_provider
-from api.v1.models.request.token import Token
-from finances.database.dao import DAO
-from finances.exceptions.user import UserNotFound
-from finances.models import dto
-from finances.models.dto.config import AuthConfig
+from backend.api.v1.dependencies.db import dao_provider
+from backend.api.v1.models.request.token import Token
+from backend.finances.database.dao import DAO
+from backend.finances.exceptions.user import UserNotFound
+from backend.finances.models import dto
+from backend.finances.models.dto.config import AuthConfig
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='api/v1/auth/login')
 

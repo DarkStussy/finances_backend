@@ -1,5 +1,5 @@
-from finances.models import dto
-from finances.models.enums.user_type import UserType
+from backend.finances.models import dto
+from backend.finances.models.enums.user_type import UserType
 
 
 def get_test_user() -> dto.User:

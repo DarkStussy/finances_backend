@@ -4,7 +4,7 @@ from _decimal import Decimal
 from dataclasses import dataclass
 from uuid import UUID
 
-from finances.models import dto
+from backend.finances.models import dto
 from .currency import CurrencyResponse
 
 

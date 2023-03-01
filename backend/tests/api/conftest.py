@@ -8,22 +8,25 @@ from fastapi import FastAPI, APIRouter
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from api import v1
-from api.main_factory import create_app
-from api.v1.dependencies import AuthProvider
-from finances.database.dao import DAO
-from finances.database.models import Currency, Asset, TransactionCategory
-from finances.exceptions.asset import AssetNotFound
-from finances.exceptions.currency import CurrencyNotFound
-from finances.exceptions.transaction import TransactionCategoryNotFound, \
+from backend.api import v1
+from backend.api.main_factory import create_app
+from backend.api.v1.dependencies import AuthProvider
+from backend.finances.database.dao import DAO
+from backend.finances.database.models import Currency, Asset, \
+    TransactionCategory
+from backend.finances.exceptions.asset import AssetNotFound
+from backend.finances.exceptions.currency import CurrencyNotFound
+from backend.finances.exceptions.transaction import \
+    TransactionCategoryNotFound, \
     TransactionNotFound
-from finances.exceptions.user import UserNotFound
-from finances.models import dto
-from finances.models.dto.config import Config
-from tests.fixtures.asset_data import get_test_asset
-from tests.fixtures.currency_data import get_test_currency
-from tests.fixtures.transaction_data import get_test_transaction_category
-from tests.fixtures.user_data import get_test_user
+from backend.finances.exceptions.user import UserNotFound
+from backend.finances.models import dto
+from backend.finances.models.dto.config import Config
+from backend.tests.fixtures.asset_data import get_test_asset
+from backend.tests.fixtures.currency_data import get_test_currency
+from backend.tests.fixtures.transaction_data import \
+    get_test_transaction_category
+from backend.tests.fixtures.user_data import get_test_user
 
 
 @pytest.fixture(scope='session')

@@ -1,18 +1,19 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from starlette import status
 
-from api.v1.dependencies import get_current_user, dao_provider
-from api.v1.models.request.transaction import TransactionCreate, \
+from backend.api.v1.dependencies import get_current_user, dao_provider
+from backend.api.v1.models.request.transaction import TransactionCreate, \
     TransactionChange
-from api.v1.models.response.transaction import TransactionResponse
-from finances.database.dao import DAO
-from finances.exceptions.asset import AssetNotFound, AssetCantBeDeleted
-from finances.exceptions.transaction import TransactionCategoryNotFound, \
+from backend.api.v1.models.response.transaction import TransactionResponse
+from backend.finances.database.dao import DAO
+from backend.finances.exceptions.asset import AssetNotFound, AssetCantBeDeleted
+from backend.finances.exceptions.transaction import \
+    TransactionCategoryNotFound, \
     AddTransactionError, TransactionNotFound, MergeTransactionError, \
     TransactionCantBeChanged, TransactionCantBeDeleted
-from finances.models import dto
-from finances.models.enums.transaction_type import TransactionType
-from finances.services.transaction import add_transaction, \
+from backend.finances.models import dto
+from backend.finances.models.enums.transaction_type import TransactionType
+from backend.finances.services.transaction import add_transaction, \
     get_transaction_by_id, change_transaction, delete_transaction
 
 

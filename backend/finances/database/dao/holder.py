@@ -1,10 +1,11 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from finances.database.dao.asset import AssetDAO
-from finances.database.dao.currency import CurrencyDAO
-from finances.database.dao.transaction import TransactionDAO
-from finances.database.dao.transaction_category import TransactionCategoryDAO
-from finances.database.dao.user import UserDAO
+from backend.finances.database.dao.asset import AssetDAO
+from backend.finances.database.dao.currency import CurrencyDAO
+from backend.finances.database.dao.transaction import TransactionDAO
+from backend.finances.database.dao.transaction_category import \
+    TransactionCategoryDAO
+from backend.finances.database.dao.user import UserDAO
 
 
 class DAO:

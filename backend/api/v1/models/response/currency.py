@@ -3,7 +3,7 @@ from __future__ import annotations
 from _decimal import Decimal
 from dataclasses import dataclass
 
-from finances.models import dto
+from backend.finances.models import dto
 
 
 @dataclass

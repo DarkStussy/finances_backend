@@ -1,10 +1,10 @@
 from fastapi import FastAPI, APIRouter
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from api.v1.dependencies.auth import AuthProvider, get_current_user, \
+from backend.api.v1.dependencies.auth import AuthProvider, get_current_user, \
     get_auth_provider
-from api.v1.dependencies.db import DatabaseProvider, dao_provider
-from finances.models.dto.config import Config
+from backend.api.v1.dependencies.db import DatabaseProvider, dao_provider
+from backend.finances.models.dto.config import Config
 
 
 def setup(app: FastAPI,

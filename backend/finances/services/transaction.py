@@ -1,9 +1,10 @@
-from finances.database.dao import DAO
-from finances.database.dao.transaction_category import TransactionCategoryDAO
-from finances.exceptions.transaction import TransactionCategoryNotFound, \
-    TransactionNotFound, TransactionCantBeChanged
-from finances.models import dto
-from finances.models.enums.transaction_type import TransactionType
+from backend.finances.database.dao import DAO
+from backend.finances.database.dao.transaction_category import \
+    TransactionCategoryDAO
+from backend.finances.exceptions.transaction import \
+    TransactionCategoryNotFound, TransactionNotFound, TransactionCantBeChanged
+from backend.finances.models import dto
+from backend.finances.models.enums.transaction_type import TransactionType
 
 from .asset import get_asset_by_id
 from ..database.dao.transaction import TransactionDAO

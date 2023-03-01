@@ -4,11 +4,11 @@ from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from finances.database.dao import BaseDAO
-from finances.database.models import TransactionCategory
-from finances.exceptions.transaction import TransactionCategoryExists, \
-    TransactionCategoryNotFound
-from finances.models import dto
+from backend.finances.database.dao import BaseDAO
+from backend.finances.database.models import TransactionCategory
+from backend.finances.exceptions.transaction import \
+    TransactionCategoryExists, TransactionCategoryNotFound
+from backend.finances.models import dto
 
 
 class TransactionCategoryDAO(BaseDAO[TransactionCategory]):

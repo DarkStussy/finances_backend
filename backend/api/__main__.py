@@ -5,9 +5,9 @@ import uvicorn
 from fastapi import APIRouter
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
-from api import v1
-from api.config import load_config
-from api.main_factory import create_app
+from backend.api import v1
+from backend.api.config import load_config
+from backend.api.main_factory import create_app
 
 
 def main():
@@ -29,8 +29,8 @@ def main():
 
     app.include_router(main_api_router)
 
-    return app
+    uvicorn.run(app, log_config=None)
 
 
 if __name__ == '__main__':
-    uvicorn.run('api:main', factory=True, log_config=None)
+    main()

@@ -1,14 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, Body
 from starlette import status
 
-from api.v1.dependencies import get_current_user, dao_provider, AuthProvider, \
+from backend.api.v1.dependencies import get_current_user, dao_provider, \
+    AuthProvider, \
     get_auth_provider
-from api.v1.models.request.user import UserCreate
-from finances.database.dao.holder import DAO
-from finances.exceptions.user import UserException, UserExists
-from finances.models import dto
-from finances.models.enums.user_type import UserType
-from finances.services.user import set_password, set_username
+from backend.api.v1.models.request.user import UserCreate
+from backend.finances.database.dao.holder import DAO
+from backend.finances.exceptions.user import UserException, UserExists
+from backend.finances.models import dto
+from backend.finances.models.enums.user_type import UserType
+from backend.finances.services.user import set_password, set_username
 
 
 async def get_user_route(

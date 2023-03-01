@@ -5,7 +5,7 @@ from sqlalchemy import select, func, Row, RowMapping, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.interfaces import ORMOption
 
-from finances.database.models import Base
+from backend.finances.database.models import Base
 
 Model = TypeVar('Model', Base, Base)
 

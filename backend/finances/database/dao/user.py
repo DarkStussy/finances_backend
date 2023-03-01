@@ -5,10 +5,10 @@ from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from finances.database.dao.base import BaseDAO
-from finances.database.models import User, UserConfiguration
-from finances.exceptions.user import UserExists, UserNotFound
-from finances.models import dto
+from backend.finances.database.dao.base import BaseDAO
+from backend.finances.database.models import User, UserConfiguration
+from backend.finances.exceptions.user import UserExists, UserNotFound
+from backend.finances.models import dto
 
 
 class UserDAO(BaseDAO[User]):

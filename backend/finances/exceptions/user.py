@@ -1,4 +1,4 @@
-from finances.exceptions.base import FinancesBaseException
+from backend.finances.exceptions.base import FinancesBaseException
 
 
 class UserException(FinancesBaseException):

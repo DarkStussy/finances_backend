@@ -1,13 +1,16 @@
 from fastapi import Depends, APIRouter, HTTPException, Query
 from starlette import status
 
-from api.v1.dependencies import get_current_user, dao_provider
-from api.v1.models.request.currency import CurrencyCreate, CurrencyChange
-from api.v1.models.response.currency import CurrencyResponse
-from finances.database.dao import DAO
-from finances.exceptions.currency import CurrencyNotFound, CurrencyCantBeBase
-from finances.models import dto
-from finances.services.currency import add_new_currency, change_currency, \
+from backend.api.v1.dependencies import get_current_user, dao_provider
+from backend.api.v1.models.request.currency import CurrencyCreate, \
+    CurrencyChange
+from backend.api.v1.models.response.currency import CurrencyResponse
+from backend.finances.database.dao import DAO
+from backend.finances.exceptions.currency import CurrencyNotFound, \
+    CurrencyCantBeBase
+from backend.finances.models import dto
+from backend.finances.services.currency import add_new_currency, \
+    change_currency, \
     delete_currency, set_base_currency, get_currency_by_id
 
 

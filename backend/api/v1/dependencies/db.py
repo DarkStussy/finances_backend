@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from finances.database.dao import DAO
+from backend.finances.database.dao import DAO
 
 
 def dao_provider() -> DAO:

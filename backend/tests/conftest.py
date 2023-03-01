@@ -11,9 +11,9 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, \
     async_sessionmaker
 from sqlalchemy.orm import close_all_sessions
 
-from finances.database.dao import DAO
-from finances.models.dto.config import Config
-from tests.load_test_config import load_test_config
+from backend.finances.database.dao import DAO
+from backend.finances.models.dto.config import Config
+from backend.tests.load_test_config import load_test_config
 
 
 @pytest.fixture(scope='session')
