@@ -60,7 +60,7 @@ class TransactionDAO(BaseDAO[Transaction]):
 
     async def merge(self, transaction_dto: dto.Transaction) -> dto.Transaction:
         transaction = Transaction.from_dto(transaction_dto)
-        await self.session.merge(transaction)
+        transaction = await self.session.merge(transaction)
         try:
             await self._flush(transaction)
         except IntegrityError as e:

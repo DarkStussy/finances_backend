@@ -130,6 +130,9 @@ async def change_transaction(
     transaction_id = transaction['id']
 
     transaction_dto = await dao.transaction.get_by_id(transaction_id)
+    if transaction_dto.user_id != user.id:
+        raise TransactionNotFound
+
     category_dto = await get_transaction_category_by_id(
         category_id, user, dao.transaction_category) if \
         transaction_dto.category.id != category_id else \

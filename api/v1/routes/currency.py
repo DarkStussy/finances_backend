@@ -66,7 +66,7 @@ async def delete_currency_route(
 async def get_currencies_route(
         include_defaults: bool = Query(default=False),
         current_user: dto.User = Depends(get_current_user),
-        dao: DAO = Depends(dao_provider)) -> list[dto.Currency]:
+        dao: DAO = Depends(dao_provider)) -> list[CurrencyResponse]:
     currencies = await dao.currency.get_all_by_user_id(current_user.id)
     if not include_defaults:
         return currencies

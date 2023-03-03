@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -41,3 +41,24 @@ class CryptoPortfolioDAO(BaseDAO[CryptoPortfolio]):
             raise CryptoPortfolioExists from e
         else:
             return crypto_portfolio.to_dto()
+
+    async def merge(self, crypto_portfolio_dto: dto.CryptoPortfolio) \
+            -> dto.CryptoPortfolio:
+        crypto_portfolio = CryptoPortfolio.from_dto(crypto_portfolio_dto)
+        crypto_portfolio = await self.session.merge(crypto_portfolio)
+        try:
+            await self._flush(crypto_portfolio)
+        except IntegrityError as e:
+            raise CryptoPortfolioExists from e
+        else:
+            return crypto_portfolio.to_dto()
+
+    async def delete_by_id(self, crypto_portfolio_id: UUID,
+                           user_id: UUID) -> int:
+        stmt = delete(CryptoPortfolio) \
+            .where(CryptoPortfolio.id == crypto_portfolio_id,
+                   CryptoPortfolio.user_id == user_id) \
+            .returning(CryptoPortfolio.id)
+        currency = await self.session.execute(stmt)
+        await self.commit()
+        return currency.scalar()

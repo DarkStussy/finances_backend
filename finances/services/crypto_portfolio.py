@@ -28,3 +28,34 @@ async def add_crypto_portfolio(
         crypto_portfolio_dto)
     await crypto_portfolio_dao.commit()
     return crypto_portfolio_dto
+
+
+async def change_crypto_portfolio(
+        crypto_portfolio: dict,
+        user: dto.User,
+        crypto_portfolio_dao: CryptoPortfolioDAO
+) -> dto.CryptoPortfolio:
+    changed_crypto_portfolio_dto = dto.CryptoPortfolio.from_dict(
+        crypto_portfolio)
+    crypto_portfolio_dto = await crypto_portfolio_dao.get_by_id(
+        changed_crypto_portfolio_dto.id)
+    if crypto_portfolio_dto.user_id != user.id:
+        raise CryptoPortfolioNotFound
+
+    changed_crypto_portfolio_dto.user_id = user.id
+    changed_crypto_portfolio_dto = await crypto_portfolio_dao.merge(
+        changed_crypto_portfolio_dto)
+    await crypto_portfolio_dao.commit()
+
+    return changed_crypto_portfolio_dto
+
+
+async def delete_crypto_portfolio(
+        crypto_portfolio_id: UUID,
+        user: dto.User,
+        crypto_portfolio_dao: CryptoPortfolioDAO
+):
+    deleted_crypto_portfolio_id = await crypto_portfolio_dao.delete_by_id(
+        crypto_portfolio_id, user.id)
+    if deleted_crypto_portfolio_id is None:
+        raise CryptoPortfolioNotFound

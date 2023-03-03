@@ -46,8 +46,8 @@ class AssetDAO(BaseDAO[Asset]):
 
     async def merge(self, asset_dto: dto.Asset) -> dto.Asset:
         asset = Asset.from_dto(asset_dto)
+        asset = await self.session.merge(asset)
         try:
-            asset = await self.session.merge(asset)
             await self._flush(asset)
         except IntegrityError as e:
             raise AssetExists from e
