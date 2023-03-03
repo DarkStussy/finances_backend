@@ -250,6 +250,22 @@ class CryptoPortfolio(Base):
         UniqueConstraint('user_id', 'title', name='u_crypto_portfolio1'),
     )
 
+    def to_dto(self) -> dto.CryptoPortfolio:
+        return dto.CryptoPortfolio(
+            id=self.id,
+            title=self.title,
+            user_id=self.user_id,
+        )
+
+    @classmethod
+    def from_dto(cls, crypto_portfolio_dto: dto.CryptoPortfolio) \
+            -> CryptoPortfolio:
+        return CryptoPortfolio(
+            id=crypto_portfolio_dto.id,
+            title=crypto_portfolio_dto.title,
+            user_id=crypto_portfolio_dto.user_id
+        )
+
 
 class CryptoCurrency(Base):
     __tablename__ = 'crypto_currency'
@@ -277,5 +293,6 @@ class CryptoPortfolioTransaction(Base):
         Integer,
         ForeignKey('crypto_currency.id', ondelete='CASCADE'),
         nullable=False)
+    type: Mapped[str] = mapped_column(String, nullable=False)
     amount: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
     created: Mapped[datetime] = mapped_column(DateTime)
