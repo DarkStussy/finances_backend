@@ -118,7 +118,7 @@ async def test_delete_transaction(
 ):
     token = auth.create_user_token(user)
     resp = await client.delete(
-        f'/api/v1/transaction/delete/{transaction.id}',
+        f'/api/v1/transaction/{transaction.id}',
         headers={
             'Authorization': 'Bearer ' + token.access_token},
     )
@@ -165,7 +165,7 @@ async def test_change_transaction(
         'id': transaction.id
     }
     resp = await client.put(
-        f'/api/v1/transaction/change',
+        '/api/v1/transaction/change',
         headers={
             'Authorization': 'Bearer ' + token.access_token},
         json=changed_transaction_dict

@@ -109,8 +109,6 @@ def get_currency_router() -> APIRouter:
                          methods=['POST'])
     router.add_api_route('/change', change_currency_route,
                          methods=['PUT'])
-    router.add_api_route('/delete/{currency_id}', delete_currency_route,
-                         methods=['DELETE'])
     router.add_api_route('/all', get_currencies_route,
                          methods=['GET'])
     router.add_api_route('/base_currency', get_base_currency_route,
@@ -118,6 +116,8 @@ def get_currency_router() -> APIRouter:
     router.add_api_route('/base_currency/{currency_id}',
                          set_base_currency_route,
                          methods=['PUT'])
+    router.add_api_route('/{currency_id}', delete_currency_route,
+                         methods=['DELETE'])
     router.add_api_route('/{currency_id}', get_currency_by_id_route,
                          methods=['GET'])
     return router

@@ -84,8 +84,8 @@ def get_asset_router() -> APIRouter:
     router = APIRouter()
     router.add_api_route('/add', add_new_asset_route, methods=['POST'])
     router.add_api_route('/change', change_asset_route, methods=['PUT'])
-    router.add_api_route('/delete/{asset_id}', delete_asset_route,
-                         methods=['DELETE'])
     router.add_api_route('/all', get_all_assets_route, methods=['GET'])
+    router.add_api_route('/{asset_id}', delete_asset_route,
+                         methods=['DELETE'])
     router.add_api_route('/{asset_id}', get_asset_by_id_route, methods=['GET'])
     return router

@@ -87,7 +87,7 @@ async def test_delete_transaction_category(
 ):
     token = auth.create_user_token(user)
     resp = await client.delete(
-        f'/api/v1/transaction/category/delete/{transaction_category.id}',
+        f'/api/v1/transaction/category/{transaction_category.id}',
         headers={
             'Authorization': 'Bearer ' + token.access_token}
     )

@@ -84,7 +84,7 @@ async def test_delete_currency(
         client: AsyncClient):
     token = auth.create_user_token(user)
     del_curr = lambda: client.delete(  # noqa
-        f'/api/v1/currency/delete/{currency.id}',
+        f'/api/v1/currency/{currency.id}',
         headers={
             'Authorization': 'Bearer ' + token.access_token},
     )
@@ -131,9 +131,9 @@ async def test_get_currencies(
     )
     assert resp.is_success
     default_currency_dict = dataclasses.asdict(currency)
+    default_currency_dict.pop('user_id')
     default_currency_dict['rate_to_base_currency'] = float(
         default_currency_dict['rate_to_base_currency'])
-    default_currency_dict['user_id'] = str(default_currency_dict['user_id'])
     assert default_currency_dict in resp.json()
 
 

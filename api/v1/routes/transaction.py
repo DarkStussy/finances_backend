@@ -106,9 +106,9 @@ def get_transaction_router() -> APIRouter:
     router = APIRouter()
     router.add_api_route('/add', add_transaction_route, methods=['POST'])
     router.add_api_route('/change', change_transaction_route, methods=['PUT']),
-    router.add_api_route('/delete/{transaction_id}', delete_transaction_route,
-                         methods=['DELETE'])
     router.add_api_route('/all', get_all_transactions_route, methods=['GET'])
+    router.add_api_route('/{transaction_id}', delete_transaction_route,
+                         methods=['DELETE'])
     router.add_api_route('/{transaction_id}', get_transaction_by_id_route,
                          methods=['GET'])
     return router

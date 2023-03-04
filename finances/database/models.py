@@ -59,10 +59,17 @@ class UserConfiguration(Base):
                                           primary_key=True)
     base_currency_id: Mapped[int] = mapped_column(
         Integer,
-        ForeignKey('currency.id', ondelete='CASCADE'),
+        ForeignKey('currency.id', ondelete='SET NULL'),
         nullable=True)
 
+    base_crypto_portfolio_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey('crypto_portfolio.id', ondelete='SET NULL'),
+        nullable=True
+    )
+
     base_currency: Mapped['Currency'] = relationship()
+    base_crypto_portfolio: Mapped['CryptoPortfolio'] = relationship()
 
 
 class Asset(Base):

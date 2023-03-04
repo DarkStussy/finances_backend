@@ -85,7 +85,7 @@ async def test_delete_asset(
 ):
     token = auth.create_user_token(user)
     resp = await client.delete(
-        f'/api/v1/asset/delete/{asset.id}',
+        f'/api/v1/asset/{asset.id}',
         headers={
             'Authorization': 'Bearer ' + token.access_token}
     )
@@ -149,7 +149,7 @@ async def test_delete_asset_currency(
 ):
     token = auth.create_user_token(user)
     resp = await client.delete(
-        f'/api/v1/currency/delete/{asset.currency.id}',
+        f'/api/v1/currency/{asset.currency.id}',
         headers={
             'Authorization': 'Bearer ' + token.access_token},
     )

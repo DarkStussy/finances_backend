@@ -102,11 +102,11 @@ def get_transaction_category_router() -> APIRouter:
                          methods=['POST'])
     router.add_api_route('/change', change_transaction_category_route,
                          methods=['PUT'])
-    router.add_api_route('/delete/{category_id}',
-                         delete_transaction_category_route,
-                         methods=['DELETE'])
     router.add_api_route('/all', get_all_transaction_categories_route,
                          methods=['GET'])
+    router.add_api_route('/{category_id}',
+                         delete_transaction_category_route,
+                         methods=['DELETE'])
     router.add_api_route('/{category_id}',
                          get_transaction_category_by_id_route, methods=['GET'])
     return router
