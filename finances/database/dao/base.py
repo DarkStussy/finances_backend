@@ -2,12 +2,15 @@ from typing import Generic, Type, TypeVar, Any, Sequence
 from uuid import UUID
 
 from sqlalchemy import select, func, Row, RowMapping, delete
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.interfaces import ORMOption
 
 from finances.database.models import Base
+from finances.exceptions.base import AddModelError, MergeError
+from finances.interfaces.dto import DTOProtocol
 
-Model = TypeVar('Model', Base, Base)
+Model = TypeVar('Model', bound=Base)
 
 
 class BaseDAO(Generic[Model]):
@@ -42,3 +45,24 @@ class BaseDAO(Generic[Model]):
 
     async def commit(self):
         await self.session.commit()
+
+    async def _create(self, dto_obj: DTOProtocol) -> Model:
+        obj = self.model.from_dto(dto_obj)
+        self.save(obj)
+        try:
+            await self._flush(obj)
+        except IntegrityError as e:
+            raise AddModelError from e
+        else:
+            return obj
+
+    async def _merge(self, dto_obj: DTOProtocol) \
+            -> Model:
+        obj = self.model.from_dto(dto_obj)
+        obj = await self.session.merge(obj)
+        try:
+            await self._flush(obj)
+        except IntegrityError as e:
+            raise MergeError from e
+        else:
+            return obj

@@ -7,6 +7,7 @@ from sqlalchemy.orm import joinedload
 
 from finances.database.dao import BaseDAO
 from finances.database.models import Transaction, Asset, TransactionCategory
+from finances.exceptions.base import MergeError, AddModelError
 from finances.exceptions.transaction import AddTransactionError, \
     TransactionNotFound, MergeTransactionError, TransactionCantBeDeleted
 from finances.models import dto
@@ -43,27 +44,18 @@ class TransactionDAO(BaseDAO[Transaction]):
 
     async def create(self, transaction_dto: dto.Transaction) \
             -> dto.Transaction:
-        transaction = Transaction(
-            user_id=transaction_dto.user_id,
-            asset_id=transaction_dto.asset_id,
-            category_id=transaction_dto.category_id,
-            amount=transaction_dto.amount,
-            created=transaction_dto.created
-        )
-        self.save(transaction)
+
         try:
-            await self._flush(transaction)
-        except IntegrityError as e:
+            transaction = await self._create(transaction_dto)
+        except AddModelError as e:
             raise AddTransactionError from e
         else:
             return transaction.to_dto(with_asset=False, with_category=False)
 
     async def merge(self, transaction_dto: dto.Transaction) -> dto.Transaction:
-        transaction = Transaction.from_dto(transaction_dto)
-        transaction = await self.session.merge(transaction)
         try:
-            await self._flush(transaction)
-        except IntegrityError as e:
+            transaction = await self._merge(transaction_dto)
+        except MergeError as e:
             raise MergeTransactionError from e
         else:
             return transaction.to_dto(with_asset=False, with_category=False)

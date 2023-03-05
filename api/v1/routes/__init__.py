@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from api.v1.routes.asset import get_asset_router
+from api.v1.routes.crypto_currency import get_crypto_currency_router
 from api.v1.routes.crypto_portfolio import get_crypto_portfolio_router
 from api.v1.routes.currency import get_currency_router
 from api.v1.routes.transaction_category import get_transaction_category_router
@@ -25,3 +26,6 @@ def setup_routers(api_router: APIRouter):
     api_router.include_router(get_crypto_portfolio_router(),
                               prefix='/cryptoportfolio',
                               tags=['cryptoportfolio'])
+    api_router.include_router(get_crypto_currency_router(),
+                              prefix='/cryptocurrency',
+                              tags=['cryptocurrency'])

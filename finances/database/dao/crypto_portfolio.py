@@ -1,11 +1,11 @@
 from uuid import UUID
 
 from sqlalchemy import select, delete
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from finances.database.dao import BaseDAO
 from finances.database.models import CryptoPortfolio
+from finances.exceptions.base import MergeError, AddModelError
 from finances.exceptions.crypto_portfolio import CryptoPortfolioExists, \
     CryptoPortfolioNotFound
 from finances.models import dto
@@ -33,22 +33,19 @@ class CryptoPortfolioDAO(BaseDAO[CryptoPortfolio]):
 
     async def create(self, crypto_portfolio_dto: dto.CryptoPortfolio) \
             -> dto.CryptoPortfolio:
-        crypto_portfolio = CryptoPortfolio.from_dto(crypto_portfolio_dto)
-        self.save(crypto_portfolio)
+
         try:
-            await self._flush(crypto_portfolio)
-        except IntegrityError as e:
+            crypto_portfolio = await self._create(crypto_portfolio_dto)
+        except AddModelError as e:
             raise CryptoPortfolioExists from e
         else:
             return crypto_portfolio.to_dto()
 
     async def merge(self, crypto_portfolio_dto: dto.CryptoPortfolio) \
             -> dto.CryptoPortfolio:
-        crypto_portfolio = CryptoPortfolio.from_dto(crypto_portfolio_dto)
-        crypto_portfolio = await self.session.merge(crypto_portfolio)
         try:
-            await self._flush(crypto_portfolio)
-        except IntegrityError as e:
+            crypto_portfolio = await self._merge(crypto_portfolio_dto)
+        except MergeError as e:
             raise CryptoPortfolioExists from e
         else:
             return crypto_portfolio.to_dto()

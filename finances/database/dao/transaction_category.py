@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from finances.database.dao import BaseDAO
 from finances.database.models import TransactionCategory
+from finances.exceptions.base import AddModelError, MergeError
 from finances.exceptions.transaction import TransactionCategoryExists, \
     TransactionCategoryNotFound
 from finances.models import dto
@@ -37,24 +38,18 @@ class TransactionCategoryDAO(BaseDAO[TransactionCategory]):
 
     async def create(self, transaction_category_dto: dto.TransactionCategory) \
             -> dto.TransactionCategory:
-        transaction_category = TransactionCategory.from_dto(
-            transaction_category_dto)
-        self.save(transaction_category)
         try:
-            await self._flush(transaction_category)
-        except IntegrityError as e:
+            transaction_category = await self._create(transaction_category_dto)
+        except AddModelError as e:
             raise TransactionCategoryExists from e
         else:
             return transaction_category.to_dto()
 
     async def merge(self, category_dto: dto.TransactionCategory) \
             -> dto.TransactionCategory:
-        category = await self.session.merge(
-            TransactionCategory.from_dto(category_dto)
-        )
         try:
-            await self._flush(category)
-        except IntegrityError as e:
+            category = await self._merge(category_dto)
+        except MergeError as e:
             raise TransactionCategoryExists from e
         else:
             return category.to_dto()

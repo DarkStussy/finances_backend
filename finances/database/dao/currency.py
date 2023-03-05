@@ -26,16 +26,11 @@ class CurrencyDAO(BaseDAO[Currency]):
         return [currency.to_dto() for currency in currencies.scalars().all()]
 
     async def create(self, currency_dto: dto.Currency) -> dto.Currency:
-        currency = Currency.from_dto(currency_dto)
-        self.save(currency)
-        await self._flush(currency)
+        currency = await self._create(currency_dto)
         return currency.to_dto()
 
     async def merge(self, currency_dto: dto.Currency) -> dto.Currency:
-        currency = await self.session.merge(
-            Currency.from_dto(currency_dto)
-        )
-        await self._flush(currency)
+        currency = await self._merge(currency_dto)
         return currency.to_dto()
 
     async def delete_by_id(self, currency_id: int, user_id: uuid.UUID) -> int:

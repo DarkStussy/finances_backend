@@ -9,6 +9,7 @@ from finances.database.dao import BaseDAO
 from finances.database.models import Asset
 from finances.exceptions.asset import AssetExists, AssetNotFound, \
     AssetCantBeDeleted
+from finances.exceptions.base import AddModelError, MergeError
 from finances.models import dto
 
 
@@ -35,21 +36,17 @@ class AssetDAO(BaseDAO[Asset]):
                 in result.scalars().all()]
 
     async def create(self, asset_dto: dto.Asset) -> dto.Asset:
-        asset = Asset.from_dto(asset_dto)
-        self.save(asset)
         try:
-            await self._flush(asset)
-        except IntegrityError as e:
+            asset = await self._create(asset_dto)
+        except AddModelError as e:
             raise AssetExists from e
         else:
             return asset.to_dto(with_currency=False)
 
     async def merge(self, asset_dto: dto.Asset) -> dto.Asset:
-        asset = Asset.from_dto(asset_dto)
-        asset = await self.session.merge(asset)
         try:
-            await self._flush(asset)
-        except IntegrityError as e:
+            asset = await self._merge(asset_dto)
+        except MergeError as e:
             raise AssetExists from e
         else:
             return asset.to_dto(with_currency=False)

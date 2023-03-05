@@ -10,13 +10,19 @@ from sqlalchemy import String, Integer, ForeignKey, Numeric, Boolean, \
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
 
+from finances.interfaces.dto import DTOProtocol
 from finances.models import dto
 from finances.models.enums.transaction_type import TransactionType
 from finances.models.enums.user_type import UserType
 
 
 class Base(DeclarativeBase):
-    pass
+    def to_dto(self) -> DTOProtocol:
+        raise NotImplementedError
+
+    @classmethod
+    def from_dto(cls, dto_object: DTOProtocol):
+        raise NotImplementedError
 
 
 class User(Base):
@@ -174,7 +180,7 @@ class Transaction(Base):
                                                  ondelete='CASCADE'),
                                              nullable=False)
     amount: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
-    created: Mapped[datetime] = mapped_column(DateTime)
+    created: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
     asset: Mapped['Asset'] = relationship()
     category: Mapped['TransactionCategory'] = relationship()
@@ -274,18 +280,51 @@ class CryptoPortfolio(Base):
         )
 
 
+class CryptoAsset(Base):
+    __tablename__ = 'crypto_asset'
+
+    id: Mapped[int] = mapped_column(UUID(as_uuid=True), primary_key=True,
+                                    default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey('user.id', ondelete='CASCADE'),
+        nullable=False
+    )
+    portfolio_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey('crypto_portfolio.id', ondelete='CASCADE'),
+        nullable=False
+    )
+    crypto_currency_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey('crypto_currency.id', ondelete='SET NULL'),
+        nullable=False
+    )
+    amount: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
+
+
 class CryptoCurrency(Base):
     __tablename__ = 'crypto_currency'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
     code: Mapped[str] = mapped_column(String, nullable=False)
-    amount: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
-    portfolio_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True),
-                                                    ForeignKey(
-                                                        'crypto_portfolio.id',
-                                                        ondelete='CASCADE'),
-                                                    nullable=False)
+
+    def to_dto(self) -> dto.CryptoCurrency:
+        return dto.CryptoCurrency(
+            id=self.id,
+            name=self.name,
+            code=self.code
+        )
+
+    @classmethod
+    def from_dto(cls, crypto_currency_dto: dto.CryptoCurrency) \
+            -> CryptoCurrency:
+        return CryptoCurrency(
+            id=crypto_currency_dto.id,
+            name=crypto_currency_dto.name,
+            code=crypto_currency_dto.code
+        )
 
 
 class CryptoPortfolioTransaction(Base):
@@ -296,10 +335,11 @@ class CryptoPortfolioTransaction(Base):
         UUID(as_uuid=True),
         ForeignKey('crypto_portfolio.id', ondelete='CASCADE'),
         nullable=False)
-    crypto_currency_id: Mapped[int] = mapped_column(
-        Integer,
-        ForeignKey('crypto_currency.id', ondelete='CASCADE'),
+    crypto_asset_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey('crypto_asset.id', ondelete='CASCADE'),
         nullable=False)
     type: Mapped[str] = mapped_column(String, nullable=False)
     amount: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
-    created: Mapped[datetime] = mapped_column(DateTime)
+    price: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
+    created: Mapped[datetime] = mapped_column(DateTime, nullable=False)
