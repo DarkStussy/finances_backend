@@ -1,15 +1,14 @@
 from uuid import UUID
 
 from sqlalchemy import select, delete
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from finances.database.dao import BaseDAO
 from finances.database.models import Transaction, Asset, TransactionCategory
-from finances.exceptions.base import MergeError, AddModelError
+from finances.exceptions.base import MergeModelError, AddModelError
 from finances.exceptions.transaction import AddTransactionError, \
-    TransactionNotFound, MergeTransactionError, TransactionCantBeDeleted
+    TransactionNotFound, MergeTransactionError
 from finances.models import dto
 
 
@@ -44,7 +43,6 @@ class TransactionDAO(BaseDAO[Transaction]):
 
     async def create(self, transaction_dto: dto.Transaction) \
             -> dto.Transaction:
-
         try:
             transaction = await self._create(transaction_dto)
         except AddModelError as e:
@@ -55,19 +53,21 @@ class TransactionDAO(BaseDAO[Transaction]):
     async def merge(self, transaction_dto: dto.Transaction) -> dto.Transaction:
         try:
             transaction = await self._merge(transaction_dto)
-        except MergeError as e:
+        except MergeModelError as e:
             raise MergeTransactionError from e
         else:
             return transaction.to_dto(with_asset=False, with_category=False)
 
-    async def delete_by_id(self, transaction_id: int, user_id: UUID) -> int:
+    async def delete_by_id(
+            self,
+            transaction_id: int,
+            user_id: UUID
+    ) -> Transaction | None:
         stmt = delete(Transaction) \
             .where(Transaction.id == transaction_id,
                    Transaction.user_id == user_id) \
-            .returning(Transaction.id)
+            .returning(Transaction)
         transaction = await self.session.execute(stmt)
-        try:
-            await self._flush(transaction)
-        except IntegrityError as e:
-            raise TransactionCantBeDeleted from e
-        return transaction.scalar()
+        transaction = transaction.scalar()
+        return transaction.to_dto(
+            with_asset=False, with_category=False) if transaction else None

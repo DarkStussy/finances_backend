@@ -4,7 +4,7 @@ class FinancesBaseException(Exception):
         super().__init__(msg)
 
 
-class MergeError(FinancesBaseException):
+class MergeModelError(FinancesBaseException):
     def __init__(self):
         super().__init__('Can\'t merge model')
 

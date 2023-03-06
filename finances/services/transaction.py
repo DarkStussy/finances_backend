@@ -192,17 +192,21 @@ async def delete_transaction(
         user: dto.User,
         dao: DAO
 ):
-    transaction_dto = await dao.transaction.get_by_id(
-        transaction_id)
-    transaction_id = await dao.transaction.delete_by_id(transaction_dto.id,
-                                                        user.id)
-    if transaction_id is None:
+    transaction_dto = await dao.transaction.delete_by_id(transaction_id,
+                                                         user.id)
+    if transaction_dto is None:
         raise TransactionNotFound
 
+    category = await dao.transaction_category.get_by_id(
+        transaction_dto.category_id)
+    transaction_dto.category = category
+    amount = transaction_dto.amount
     if transaction_dto.category.type == TransactionType.INCOME:
-        transaction_dto.asset.amount -= transaction_dto.amount
-    elif transaction_dto.category.type == TransactionType.EXPENSE:
-        transaction_dto.asset.amount += transaction_dto.amount
+        amount = -amount
 
-    await dao.asset.merge(transaction_dto.asset)
+    await dao.asset.update_amount(
+        amount,
+        transaction_dto.asset_id,
+        user.id
+    )
     await dao.commit()

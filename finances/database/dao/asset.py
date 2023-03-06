@@ -1,15 +1,14 @@
+from _decimal import Decimal
 from uuid import UUID
 
-from sqlalchemy import select, delete
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import select, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from finances.database.dao import BaseDAO
 from finances.database.models import Asset
-from finances.exceptions.asset import AssetExists, AssetNotFound, \
-    AssetCantBeDeleted
-from finances.exceptions.base import AddModelError, MergeError
+from finances.exceptions.asset import AssetExists, AssetNotFound
+from finances.exceptions.base import AddModelError, MergeModelError
 from finances.models import dto
 
 
@@ -29,7 +28,7 @@ class AssetDAO(BaseDAO[Asset]):
     async def get_all(self, user_dto: dto.User) -> list[dto.Asset]:
         result = await self.session.execute(
             select(Asset).where(Asset.user_id == user_dto.id,
-                                Asset.deleted.__eq__(False)).options(
+                                Asset.deleted.is_(False)).options(
                 joinedload(Asset.currency))
         )
         return [asset.to_dto(with_currency=bool(asset.currency_id)) for asset
@@ -46,7 +45,7 @@ class AssetDAO(BaseDAO[Asset]):
     async def merge(self, asset_dto: dto.Asset) -> dto.Asset:
         try:
             asset = await self._merge(asset_dto)
-        except MergeError as e:
+        except MergeModelError as e:
             raise AssetExists from e
         else:
             return asset.to_dto(with_currency=False)
@@ -57,8 +56,16 @@ class AssetDAO(BaseDAO[Asset]):
                    Asset.user_id == user_id) \
             .returning(Asset.id)
         asset = await self.session.execute(stmt)
-        try:
-            await self._flush(asset)
-        except IntegrityError as e:
-            raise AssetCantBeDeleted from e
         return asset.scalar()
+
+    async def update_amount(
+            self,
+            amount: Decimal,
+            asset_id: UUID,
+            user_id: UUID
+    ):
+        stmt = update(Asset).where(
+            Asset.id == asset_id,
+            Asset.user_id == user_id
+        ).values(amount=Asset.amount + amount)
+        await self.session.execute(stmt)

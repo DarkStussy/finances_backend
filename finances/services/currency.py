@@ -50,6 +50,7 @@ async def delete_currency(
     deleted_currency_id = await currency_dao.delete_by_id(currency_id, user.id)
     if deleted_currency_id is None:
         raise CurrencyNotFound
+    await currency_dao.commit()
 
 
 async def set_base_currency(currency_id: int, user: dto.User, dao: DAO):

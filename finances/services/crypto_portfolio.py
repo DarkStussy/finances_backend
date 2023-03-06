@@ -59,3 +59,4 @@ async def delete_crypto_portfolio(
         crypto_portfolio_id, user.id)
     if deleted_crypto_portfolio_id is None:
         raise CryptoPortfolioNotFound
+    await crypto_portfolio_dao.commit()

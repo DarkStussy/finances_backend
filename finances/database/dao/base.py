@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.interfaces import ORMOption
 
 from finances.database.models import Base
-from finances.exceptions.base import AddModelError, MergeError
+from finances.exceptions.base import AddModelError, MergeModelError
 from finances.interfaces.dto import DTOProtocol
 
 Model = TypeVar('Model', bound=Base)
@@ -63,6 +63,7 @@ class BaseDAO(Generic[Model]):
         try:
             await self._flush(obj)
         except IntegrityError as e:
-            raise MergeError from e
+            print(e)
+            raise MergeModelError from e
         else:
             return obj

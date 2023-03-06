@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, validator
 class TransactionCreate(BaseModel):
     asset_id: UUID
     category_id: int
-    amount: Decimal = Field(gt=0, max_digits=16)
+    amount: Decimal = Field(gt=0, max_digits=16, decimal_places=8)
     created: datetime = Field(description='Format: %Y-%m-%d %H:%M',
                               example='2023-02-19 22:04')
 

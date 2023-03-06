@@ -63,8 +63,7 @@ async def test_change_transaction_category(
     transaction_category.title = 'test change category'
     category_dict = {
         'id': transaction_category.id,
-        'title': transaction_category.title,
-        'type': transaction_category.type.value
+        'title': transaction_category.title
     }
     resp = await client.put(
         '/api/v1/transaction/category/change',
@@ -74,7 +73,7 @@ async def test_change_transaction_category(
     )
 
     assert resp.is_success
-
+    category_dict['type'] = 'income'
     assert resp.json() == category_dict
 
 

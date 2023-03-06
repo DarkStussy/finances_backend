@@ -8,5 +8,6 @@ class TransactionCategoryCreate(BaseModel):
     type: TransactionType
 
 
-class TransactionCategoryChange(TransactionCategoryCreate):
+class TransactionCategoryChange(BaseModel):
     id: int
+    title: str = Field(min_length=3, max_length=100)

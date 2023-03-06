@@ -19,6 +19,6 @@ class TransactionCategory:
         return TransactionCategory(
             id=dct.get('id'),
             title=dct.get('title'),
-            type=TransactionType(dct.get('type')),
+            type=dct.get('type'),
             user_id=dct.get('user_id')
         )

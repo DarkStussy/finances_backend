@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from finances.database.dao import BaseDAO
 from finances.database.models import CryptoPortfolio
-from finances.exceptions.base import MergeError, AddModelError
+from finances.exceptions.base import MergeModelError, AddModelError
 from finances.exceptions.crypto_portfolio import CryptoPortfolioExists, \
     CryptoPortfolioNotFound
 from finances.models import dto
@@ -45,7 +45,7 @@ class CryptoPortfolioDAO(BaseDAO[CryptoPortfolio]):
             -> dto.CryptoPortfolio:
         try:
             crypto_portfolio = await self._merge(crypto_portfolio_dto)
-        except MergeError as e:
+        except MergeModelError as e:
             raise CryptoPortfolioExists from e
         else:
             return crypto_portfolio.to_dto()
@@ -57,5 +57,4 @@ class CryptoPortfolioDAO(BaseDAO[CryptoPortfolio]):
                    CryptoPortfolio.user_id == user_id) \
             .returning(CryptoPortfolio.id)
         currency = await self.session.execute(stmt)
-        await self.commit()
         return currency.scalar()

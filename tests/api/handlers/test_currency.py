@@ -74,6 +74,7 @@ async def test_change_currency(
     assert changed_currency == resp.json()
 
     await dao.currency.delete_by_id(currency.id, user.id)
+    await dao.commit()
 
 
 @pytest.mark.asyncio

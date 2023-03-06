@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from finances.database.dao import BaseDAO
 from finances.database.models import CryptoCurrency
-from finances.exceptions.base import AddModelError, MergeError
+from finances.exceptions.base import AddModelError, MergeModelError
 from finances.exceptions.crypto_currency import CryptoCurrencyNotFound, \
     CryptoCurrencyException
 from finances.models import dto
@@ -42,7 +42,7 @@ class CryptoCurrencyDAO(BaseDAO[CryptoCurrency]):
             -> dto.CryptoCurrency:
         try:
             crypto_currency = await self._merge(crypto_currency_dto)
-        except MergeError as e:
+        except MergeModelError as e:
             raise CryptoCurrencyException(
                 'Unable to change crypto currency') from e
         else:

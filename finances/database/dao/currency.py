@@ -39,5 +39,4 @@ class CurrencyDAO(BaseDAO[Currency]):
                    Currency.user_id == user_id) \
             .returning(Currency.id)
         currency = await self.session.execute(stmt)
-        await self.commit()
         return currency.scalar()

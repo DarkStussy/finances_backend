@@ -1,12 +1,11 @@
 from uuid import UUID
 
 from sqlalchemy import delete, select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from finances.database.dao import BaseDAO
 from finances.database.models import TransactionCategory
-from finances.exceptions.base import AddModelError, MergeError
+from finances.exceptions.base import AddModelError, MergeModelError
 from finances.exceptions.transaction import TransactionCategoryExists, \
     TransactionCategoryNotFound
 from finances.models import dto
@@ -49,7 +48,7 @@ class TransactionCategoryDAO(BaseDAO[TransactionCategory]):
             -> dto.TransactionCategory:
         try:
             category = await self._merge(category_dto)
-        except MergeError as e:
+        except MergeModelError as e:
             raise TransactionCategoryExists from e
         else:
             return category.to_dto()
@@ -60,5 +59,4 @@ class TransactionCategoryDAO(BaseDAO[TransactionCategory]):
                    TransactionCategory.user_id == user_id) \
             .returning(TransactionCategory.id)
         currency = await self.session.execute(stmt)
-        await self.commit()
         return currency.scalar()
