@@ -14,8 +14,10 @@ from api.v1.dependencies import AuthProvider
 from finances.database.dao import DAO
 from finances.database.models import Currency, Asset, TransactionCategory
 from finances.exceptions.asset import AssetNotFound
+from finances.exceptions.crypto_asset import CryptoAssetNotFound
 from finances.exceptions.crypto_currency import CryptoCurrencyNotFound
 from finances.exceptions.crypto_portfolio import CryptoPortfolioNotFound
+from finances.exceptions.crypto_transaction import CryptoTransactionNotFound
 from finances.exceptions.currency import CurrencyNotFound
 from finances.exceptions.transaction import TransactionCategoryNotFound, \
     TransactionNotFound
@@ -23,8 +25,10 @@ from finances.exceptions.user import UserNotFound
 from finances.models import dto
 from finances.models.dto.config import Config
 from tests.fixtures.asset_data import get_test_asset
-from tests.fixtures.crypto_currency_data import get_test_cryptocurrency
+from tests.fixtures.crypto_currency_data import get_test_cryptocurrency, \
+    get_test_cryptocurrency2
 from tests.fixtures.crypto_portfolio_data import get_test_crypto_portfolio
+from tests.fixtures.crypto_transaction_data import get_test_crypto_transaction
 from tests.fixtures.currency_data import get_test_currency
 from tests.fixtures.transaction_data import get_test_transaction_category
 from tests.fixtures.user_data import get_test_user
@@ -161,6 +165,7 @@ async def crypto_portfolio(
         crypto_portfolio_dto.user_id = user.id
         crypto_portfolio_dto = await dao.crypto_portfolio.merge(
             crypto_portfolio_dto)
+        await dao.user.set_base_crypto_portfolio(user, crypto_portfolio_dto.id)
         await dao.commit()
 
     return crypto_portfolio_dto
@@ -180,3 +185,66 @@ async def crypto_currency(
         await dao.commit()
 
     return crypto_currency_dto
+
+
+@pytest_asyncio.fixture
+async def crypto_currency2(
+        dao: DAO
+) -> dto.CryptoCurrency:
+    crypto_currency_dto = get_test_cryptocurrency2()
+    try:
+        crypto_currency_dto = await dao.crypto_currency.get_by_id(
+            crypto_currency_dto.id)
+    except CryptoCurrencyNotFound:
+        crypto_currency_dto = await dao.crypto_currency.merge(
+            crypto_currency_dto)
+        await dao.commit()
+
+    return crypto_currency_dto
+
+
+@pytest_asyncio.fixture
+async def crypto_asset(
+        user: dto.User,
+        crypto_portfolio: dto.CryptoPortfolio,
+        crypto_currency: dto.CryptoCurrency,
+        dao: DAO
+) -> dto.CryptoAsset:
+    try:
+        crypto_asset_dto = await dao.crypto_asset.get_by_id(1)
+    except CryptoAssetNotFound:
+        crypto_asset_dto = await dao.crypto_asset.merge(
+            dto.CryptoAsset(
+                id=1,
+                user_id=user.id,
+                portfolio_id=crypto_portfolio.id,
+                crypto_currency_id=crypto_currency.id,
+                amount=None
+            )
+        )
+        await dao.commit()
+        crypto_asset_dto.crypto_currency = crypto_currency
+    return crypto_asset_dto
+
+
+@pytest_asyncio.fixture
+async def crypto_transaction(
+        user: dto.User,
+        crypto_portfolio: dto.CryptoPortfolio,
+        crypto_asset: dto.CryptoAsset,
+        dao: DAO
+) -> dto.CryptoTransaction:
+    crypto_transaction_dto = get_test_crypto_transaction()
+    try:
+        crypto_transaction_dto = await dao.crypto_transaction.get_by_id(
+            crypto_transaction_dto.id
+        )
+    except CryptoTransactionNotFound:
+        crypto_transaction_dto.user_id = user.id
+        crypto_transaction_dto.portfolio_id = crypto_portfolio.id
+        crypto_transaction_dto.crypto_asset_id = crypto_asset.id
+        crypto_transaction_dto = await dao.crypto_transaction.merge(
+            crypto_transaction_dto)
+        await dao.commit()
+
+    return crypto_transaction_dto

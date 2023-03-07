@@ -62,7 +62,7 @@ async def test_add_transaction(
         'asset_id': str(asset.id),
         'category_id': transaction_category.id,
         'amount': 10,
-        'created': '2023-02-22 22:04'
+        'created': '2023-02-22T22:04:00'
     }
     resp = await client.post(
         '/api/v1/transaction/add',

@@ -122,7 +122,8 @@ async def test_get_currencies(
         client: AsyncClient,
         user: dto.User,
         auth: AuthProvider,
-        currency: dto.Currency):
+        currency: dto.Currency
+):
     token = auth.create_user_token(user)
 
     resp = await client.get(

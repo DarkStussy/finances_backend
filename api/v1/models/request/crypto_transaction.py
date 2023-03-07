@@ -11,15 +11,11 @@ class BaseCryptoTransaction(BaseModel):
     type: CryptoTransactionType
     amount: Decimal = Field(gt=0, max_digits=16, decimal_places=8)
     price: Decimal = Field(gt=0, max_digits=16, decimal_places=8)
-    created: datetime = Field(description='Format: %Y-%m-%d %H:%M',
-                              example='2023-02-19 22:04')
+    created: datetime = Field(example='2023-02-19T22:04:00')
 
     @validator('created', pre=True)
     def validate_created(cls, value: str) -> datetime:
-        return datetime.strptime(
-            value,
-            '%Y-%m-%d %H:%M'
-        )
+        return datetime.fromisoformat(value)
 
 
 class CryptoTransactionCreate(BaseCryptoTransaction):
