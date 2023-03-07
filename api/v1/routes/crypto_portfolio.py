@@ -139,6 +139,9 @@ def get_crypto_portfolio_router() -> APIRouter:
                          set_base_crypto_portfolio_route,
                          methods=['PUT'])
     router.add_api_route('/{crypto_portfolio_id}',
+                         delete_crypto_portfolio_route,
+                         methods=['DELETE'])
+    router.add_api_route('/{crypto_portfolio_id}',
                          get_crypto_portfolio_by_id_route,
                          methods=['GET'])
     return router

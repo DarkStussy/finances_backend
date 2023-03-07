@@ -150,7 +150,7 @@ async def test_set_base_currency(
 
     token = auth.create_user_token(user)
     resp = await client.put(
-        f'/api/v1/currency/base_currency/{currency.id}',
+        f'/api/v1/currency/baseCurrency/{currency.id}',
         headers={
             'Authorization': 'Bearer ' + token.access_token},
     )
@@ -158,7 +158,7 @@ async def test_set_base_currency(
     assert resp.is_success
 
     resp = await client.get(
-        '/api/v1/currency/base_currency',
+        '/api/v1/currency/baseCurrency',
         headers={
             'Authorization': 'Bearer ' + token.access_token},
     )
