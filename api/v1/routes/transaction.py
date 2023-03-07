@@ -1,3 +1,5 @@
+from datetime import date
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from starlette import status
 
@@ -33,12 +35,16 @@ async def get_transaction_by_id_route(
 
 
 async def get_all_transactions_route(
+        start_date: date = Query(alias='startDate'),
+        end_date: date = Query(alias='endDate'),
         transaction_type: TransactionType = Query(default=None, alias='type'),
         current_user: dto.User = Depends(get_current_user),
         dao: DAO = Depends(dao_provider)
 ) -> list[TransactionResponse]:
     return await dao.transaction.get_all(
         current_user,
+        start_date,
+        end_date,
         transaction_type.value if transaction_type else None
     )
 

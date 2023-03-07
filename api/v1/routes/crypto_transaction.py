@@ -1,7 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
-from fastapi.params import Param
+from fastapi import APIRouter, Depends, Query
 from starlette import status
 from starlette.exceptions import HTTPException
 
@@ -40,8 +39,8 @@ async def get_crypto_transaction_by_id_route(
 
 
 async def get_all_crypto_transactions_route(
-        crypto_asset_id: int = Param(),
-        portfolio_id: UUID = Param(),
+        crypto_asset_id: int = Query(alias='cryptoAssetID'),
+        portfolio_id: UUID = Query(alias='portfolioID'),
         current_user: dto.User = Depends(get_current_user),
         dao: DAO = Depends(dao_provider)
 ) -> list[CryptoTransactionResponse]:

@@ -11,6 +11,11 @@ class CurrencyNotFound(CurrencyException):
         super().__init__('Currency not found')
 
 
+class CurrencyExists(CurrencyException):
+    def __init__(self):
+        super().__init__('Currency already exists')
+
+
 class CurrencyCantBeBase(CurrencyException):
     def __init__(self):
         super().__init__('Currency cannot be base')

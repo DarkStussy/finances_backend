@@ -7,8 +7,7 @@ from api.v1.models.request.user import UserCreate
 from finances.database.dao.holder import DAO
 from finances.exceptions.user import UserException, UserExists
 from finances.models import dto
-from finances.models.enums.user_type import UserType
-from finances.services.user import set_password, set_username
+from finances.services.user import set_password, set_username, signup
 
 
 async def get_user_route(
@@ -21,12 +20,7 @@ async def signup_route(
         auth_provider: AuthProvider = Depends(get_auth_provider),
         dao: DAO = Depends(dao_provider)):
     try:
-        await dao.user.create(
-            dto.UserWithCreds(username=user_create.username,
-                              hashed_password=auth_provider.get_password_hash(
-                                  user_create.password),
-                              user_type=UserType.USER))
-        await dao.commit()
+        await signup(user_create.dict(), auth_provider, dao)
     except UserException as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=e.message)

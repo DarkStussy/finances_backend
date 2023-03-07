@@ -1,5 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.params import Param
+from fastapi import APIRouter, Depends, HTTPException, Query
 from starlette import status
 
 from api.v1.dependencies import dao_provider
@@ -23,7 +22,7 @@ async def get_crypto_currency_by_id_route(
 
 
 async def get_all_crypto_currencies_route(
-        search: str = Param(default=None, description='Search by crypto code'),
+        search: str = Query(default=None, description='Search by crypto code'),
         dao: DAO = Depends(dao_provider)
 ) -> list[dto.CryptoCurrency]:
     return await dao.crypto_currency.get_all(search)

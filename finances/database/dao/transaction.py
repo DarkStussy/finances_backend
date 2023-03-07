@@ -1,3 +1,4 @@
+from datetime import date
 from uuid import UUID
 
 from sqlalchemy import select, delete
@@ -28,9 +29,13 @@ class TransactionDAO(BaseDAO[Transaction]):
     async def get_all(
             self,
             user_dto: dto.User,
+            start_date: date,
+            end_date: date,
             transaction_type: str | None = None
     ) -> list[dto.Transaction]:
         stmt = select(Transaction).where(Transaction.user_id == user_dto.id) \
+            .filter(Transaction.created >= start_date,
+                    Transaction.created <= end_date) \
             .order_by(Transaction.created.desc(), Transaction.id.desc()) \
             .options(joinedload(Transaction.asset).joinedload(Asset.currency),
                      joinedload(Transaction.category))

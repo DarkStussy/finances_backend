@@ -19,6 +19,15 @@ class CurrencyDAO(BaseDAO[Currency]):
             raise CurrencyNotFound
         return currency.to_dto()
 
+    async def get_by_code(self, code: str, user_id: uuid.UUID | None = None) \
+            -> dto.Currency | None:
+        result = await self.session.execute(
+            select(Currency).where(Currency.code == code,
+                                   Currency.user_id == user_id)
+        )
+        currency = result.scalar_one_or_none()
+        return currency.to_dto() if currency else None
+
     async def get_all_by_user_id(self, user_id: uuid.UUID | None = None) \
             -> list[dto.Currency]:
         currencies = await self.session.execute(
