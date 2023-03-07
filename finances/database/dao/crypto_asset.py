@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
@@ -52,3 +52,15 @@ class CryptoAssetDAO(BaseDAO[CryptoAsset]):
             raise MergeCryptoAssetError from e
         else:
             return crypto_asset.to_dto(with_currency=False)
+
+    async def delete_by_id(
+            self,
+            crypto_asset_id: int,
+            user_id: UUID
+    ) -> int | None:
+        stmt = delete(CryptoAsset).where(
+            CryptoAsset.id == crypto_asset_id,
+            CryptoAsset.user_id == user_id
+        ).returning(CryptoAsset.id)
+        result = await self.session.execute(stmt)
+        return result.scalar()

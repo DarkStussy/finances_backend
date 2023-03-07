@@ -13,7 +13,8 @@ from finances.exceptions.crypto_portfolio import CryptoPortfolioExists, \
 from finances.models import dto
 from finances.services.crypto_portfolio import add_crypto_portfolio, \
     get_crypto_portfolio_by_id, change_crypto_portfolio, \
-    delete_crypto_portfolio
+    delete_crypto_portfolio, get_base_crypto_portfolio, \
+    set_base_crypto_portfolio
 
 
 async def get_crypto_portfolio_by_id_route(
@@ -50,7 +51,7 @@ async def add_crypto_portfolio_route(
         crypto_portfolio_dto = await add_crypto_portfolio(
             crypto_portfolio.dict(),
             current_user,
-            dao.crypto_portfolio
+            dao
         )
     except CryptoPortfolioExists as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
@@ -95,6 +96,35 @@ async def delete_crypto_portfolio_route(
     raise HTTPException(status_code=status.HTTP_200_OK)
 
 
+async def get_base_crypto_portfolio_route(
+        current_user: dto.User = Depends(get_current_user),
+        dao: DAO = Depends(dao_provider)
+) -> CryptoPortfolioResponse:
+    try:
+        crypto_portfolio_dto = await get_base_crypto_portfolio(
+            current_user,
+            dao.user
+        )
+    except CryptoPortfolioNotFound:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail='Base crypto portfolio not set')
+    else:
+        return CryptoPortfolioResponse.from_dto(crypto_portfolio_dto)
+
+
+async def set_base_crypto_portfolio_route(
+        crypto_portfolio_id: UUID,
+        current_user: dto.User = Depends(get_current_user),
+        dao: DAO = Depends(dao_provider)
+):
+    try:
+        await set_base_crypto_portfolio(crypto_portfolio_id, current_user, dao)
+    except CryptoPortfolioNotFound as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=e.message)
+    raise HTTPException(status_code=status.HTTP_200_OK)
+
+
 def get_crypto_portfolio_router() -> APIRouter:
     router = APIRouter()
     router.add_api_route('/add', add_crypto_portfolio_route, methods=['POST'])
@@ -102,9 +132,12 @@ def get_crypto_portfolio_router() -> APIRouter:
                          methods=['PUT'])
     router.add_api_route('/all', get_all_crypto_portfolios_route,
                          methods=['GET'])
-    router.add_api_route('/{crypto_portfolio_id}',
-                         delete_crypto_portfolio_route,
-                         methods=['DELETE'])
+    router.add_api_route('/baseCryptoPortfolio',
+                         get_base_crypto_portfolio_route,
+                         methods=['GET'])
+    router.add_api_route('/baseCryptoPortfolio/{crypto_portfolio_id}',
+                         set_base_crypto_portfolio_route,
+                         methods=['PUT'])
     router.add_api_route('/{crypto_portfolio_id}',
                          get_crypto_portfolio_by_id_route,
                          methods=['GET'])

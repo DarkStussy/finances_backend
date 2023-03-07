@@ -66,5 +66,21 @@ class UserDAO(BaseDAO[User]):
         config.base_currency_id = currency_id
         await self.session.merge(config)
 
+    async def get_base_crypto_portfolio(self, user: dto.User) \
+            -> dto.CryptoPortfolio | None:
+        config = await self.session.get(
+            UserConfiguration,
+            user.id,
+            options=[joinedload(
+                UserConfiguration.base_crypto_portfolio)])
+        return config.base_crypto_portfolio.to_dto() if \
+            config.base_crypto_portfolio else None
+
+    async def set_base_crypto_portfolio(self, user: dto.User,
+                                        portfolio_id: UUID):
+        config = await self.session.get(UserConfiguration, user.id)
+        config.base_crypto_portfolio_id = portfolio_id
+        await self.session.merge(config)
+
     async def delete_by_id(self, id_: UUID):
         await self.session.execute(delete(User).where(User.id == id_))
