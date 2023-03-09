@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from api.v1.dependencies import CurrencyAPI
 from finances.database.dao import DAO, UserDAO
 from finances.database.dao.crypto_portfolio import CryptoPortfolioDAO
 from finances.exceptions.crypto_portfolio import CryptoPortfolioNotFound
@@ -89,3 +90,21 @@ async def set_base_crypto_portfolio(
 
     await dao.user.set_base_crypto_portfolio(user, crypto_portfolio_id)
     await dao.commit()
+
+
+async def get_total_by_portfolio(
+        crypto_portfolio_id: UUID,
+        user: dto.User,
+        dao: DAO,
+        currency_api: CurrencyAPI
+) -> float:
+    crypto_assets = await dao.crypto_asset.get_all(crypto_portfolio_id,
+                                                   user.id)
+    crypto_codes = [crypto_asset.crypto_currency.code for crypto_asset in
+                    crypto_assets]
+    prices = await currency_api.get_crypto_currency_prices(crypto_codes)
+    total = 0
+    for crypto_asset in crypto_assets:
+        total += crypto_asset.amount * prices[
+            crypto_asset.crypto_currency.code + 'BUSD']
+    return total

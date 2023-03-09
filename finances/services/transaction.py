@@ -1,6 +1,6 @@
 from datetime import date
 
-from api.v1.dependencies import FCSAPI
+from api.v1.dependencies import CurrencyAPI
 from finances.database.dao import DAO
 from finances.database.dao.transaction_category import TransactionCategoryDAO
 from finances.exceptions.transaction import TransactionCategoryNotFound, \
@@ -222,9 +222,9 @@ async def get_total_transactions_by_period(
         end_date: date,
         transaction_type: TransactionType,
         user: dto.User,
-        fcsapi: FCSAPI,
+        currency_api: CurrencyAPI,
         dao: DAO
-):
+) -> float:
     currencies_amount = await dao.transaction.get_total_by_period(
         user,
         start_date,
@@ -238,7 +238,7 @@ async def get_total_transactions_by_period(
         [currency for currency, value in currencies_amount.items() if
          value[0] is None])
     base_currency = await dao.user.get_base_currency(user)
-    prices = await get_prices(base_currency, currencies_codes, fcsapi)
+    prices = await get_prices(base_currency, currencies_codes, currency_api)
 
     return round(sum([
         value[1] / prices[code] if value[0] is None else value[1] / value[0]
@@ -251,7 +251,7 @@ async def get_total_categories_by_period(
         end_date: date,
         transaction_type: TransactionType,
         user: dto.User,
-        fcsapi: FCSAPI,
+        currency_api: CurrencyAPI,
         dao: DAO
 ) -> list[TotalByCategory]:
     totals_cat_and_cur = await dao.transaction.get_total_categories_by_period(
@@ -264,7 +264,7 @@ async def get_total_categories_by_period(
         totals_cat_and_cur if total_cat_and_cur.rate_to_base_currency is None)
 
     base_currency = await dao.user.get_base_currency(user)
-    prices = await get_prices(base_currency, currencies_codes, fcsapi)
+    prices = await get_prices(base_currency, currencies_codes, currency_api)
     totals_by_category = {}
     for total_cat_and_cur in totals_cat_and_cur:
         category = totals_by_category.get(total_cat_and_cur.category)

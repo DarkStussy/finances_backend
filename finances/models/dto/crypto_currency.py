@@ -1,4 +1,5 @@
 import dataclasses
+from _decimal import Decimal
 from dataclasses import dataclass
 
 
@@ -10,3 +11,9 @@ class CryptoCurrency:
 
     def to_dict(self) -> dict:
         return dataclasses.asdict(self)
+
+
+@dataclass
+class CryptoCurrencyPrice:
+    code: str
+    price: Decimal

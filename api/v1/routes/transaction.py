@@ -3,7 +3,7 @@ from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, Query
 from starlette import status
 
-from api.v1.dependencies import get_current_user, dao_provider, FCSAPI, \
+from api.v1.dependencies import get_current_user, dao_provider, CurrencyAPI, \
     currency_api_provider
 from api.v1.models.request.transaction import TransactionCreate, \
     TransactionChange
@@ -117,7 +117,7 @@ async def get_total_transactions_by_period_route(
         end_date: date = Query(alias='endDate'),
         transaction_type: TransactionType = Query(alias='type'),
         current_user: dto.User = Depends(get_current_user),
-        fcsapi: FCSAPI = Depends(currency_api_provider),
+        currency_api: CurrencyAPI = Depends(currency_api_provider),
         dao: DAO = Depends(dao_provider)
 ) -> TotalResult:
     total = await get_total_transactions_by_period(
@@ -125,7 +125,7 @@ async def get_total_transactions_by_period_route(
         end_date,
         transaction_type,
         current_user,
-        fcsapi,
+        currency_api,
         dao
     )
     return TotalResult(total=total)
@@ -136,7 +136,7 @@ async def get_total_categories_by_period_route(
         end_date: date = Query(alias='endDate'),
         transaction_type: TransactionType = Query(alias='type'),
         current_user: dto.User = Depends(get_current_user),
-        fcsapi: FCSAPI = Depends(currency_api_provider),
+        currency_api: CurrencyAPI = Depends(currency_api_provider),
         dao: DAO = Depends(dao_provider)
 ) -> list[dto.TotalByCategory]:
     return await get_total_categories_by_period(
@@ -144,7 +144,7 @@ async def get_total_categories_by_period_route(
         end_date,
         transaction_type,
         current_user,
-        fcsapi,
+        currency_api,
         dao
     )
 

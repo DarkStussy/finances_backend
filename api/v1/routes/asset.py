@@ -3,9 +3,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
 
-from api.v1.dependencies import get_current_user, dao_provider, FCSAPI, \
+from api.v1.dependencies import get_current_user, dao_provider, CurrencyAPI, \
     currency_api_provider
-from api.v1.dependencies.currency_api import CantGetPrices
+from api.v1.dependencies.currency_api import CantGetPrice
 from api.v1.models.request.asset import AssetCreate, AssetChange
 from api.v1.models.response.asset import AssetResponse
 from api.v1.models.response.total_result import TotalResult
@@ -84,13 +84,13 @@ async def delete_asset_route(
 
 
 async def get_total_assets_route(
-        fcsapi: FCSAPI = Depends(currency_api_provider),
+        currency_api: CurrencyAPI = Depends(currency_api_provider),
         current_user: dto.User = Depends(get_current_user),
         dao: DAO = Depends(dao_provider)
 ) -> TotalResult:
     try:
-        total = await get_total_assets(fcsapi, current_user, dao)
-    except CantGetPrices:
+        total = await get_total_assets(currency_api, current_user, dao)
+    except CantGetPrice:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                             detail='Unable to calculate total price')
     else:

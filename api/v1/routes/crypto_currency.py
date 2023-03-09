@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from starlette import status
 
-from api.v1.dependencies import dao_provider
+from api.v1.dependencies import dao_provider, CurrencyAPI, \
+    currency_api_provider
 from finances.database.dao import DAO
 from finances.exceptions.crypto_currency import CryptoCurrencyNotFound
 from finances.models import dto
+from finances.services.currency_prices import get_crypto_currency_price
 
 
 async def get_crypto_currency_by_id_route(
@@ -27,6 +29,21 @@ async def get_all_crypto_currencies_route(
 ) -> list[dto.CryptoCurrency]:
     return await dao.crypto_currency.get_all(search)
 
+
+async def get_crypto_currency_price_route(
+        crypto_currency_id: int,
+        dao: DAO = Depends(dao_provider),
+        currency_api: CurrencyAPI = Depends(currency_api_provider)
+) -> dto.CryptoCurrencyPrice:
+    try:
+        return await get_crypto_currency_price(
+            crypto_currency_id,
+            dao.crypto_currency,
+            currency_api
+        )
+    except CryptoCurrencyNotFound as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=e.message)
 
 # async def add_crypto_currencies_route(
 #         dao: DAO = Depends(dao_provider)
@@ -56,6 +73,8 @@ def get_crypto_currency_router() -> APIRouter:
     router = APIRouter()
     router.add_api_route('/all', get_all_crypto_currencies_route,
                          methods=['GET'])
+    router.add_api_route('/price/{crypto_currency_id}',
+                         get_crypto_currency_price_route, methods=['GET'])
     router.add_api_route('/{crypto_currency_id}',
                          get_crypto_currency_by_id_route,
                          methods=['GET'])

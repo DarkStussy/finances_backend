@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from api.v1.dependencies import FCSAPI
+from api.v1.dependencies import CurrencyAPI
 from finances.database.dao import DAO
 from finances.database.dao.asset import AssetDAO
 from finances.database.dao.currency import CurrencyDAO
@@ -75,7 +75,7 @@ async def delete_asset(
 
 
 async def get_total_assets(
-        fcsapi: FCSAPI,
+        currency_api: CurrencyAPI,
         user: dto.User,
         dao: DAO
 ) -> float:
@@ -87,7 +87,7 @@ async def get_total_assets(
         asset.currency.code for asset in assets if
         asset.currency and not asset.currency.is_custom)
     base_currency = await dao.user.get_base_currency(user)
-    prices = await get_prices(base_currency, currencies_codes, fcsapi)
+    prices = await get_prices(base_currency, currencies_codes, currency_api)
     amounts = []
     for asset in assets:
         if asset.currency:

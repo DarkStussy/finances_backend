@@ -1,12 +1,14 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from starlette import status
 
-from api.v1.dependencies import get_current_user, dao_provider
+from api.v1.dependencies import get_current_user, dao_provider, CurrencyAPI, \
+    currency_api_provider
 from api.v1.models.request.crypto_portfolio import CryptoPortfolioCreate, \
     CryptoPortfolioChange
 from api.v1.models.response.crypto_portfolio import CryptoPortfolioResponse
+from api.v1.models.response.total_result import TotalResult
 from finances.database.dao import DAO
 from finances.exceptions.crypto_portfolio import CryptoPortfolioExists, \
     CryptoPortfolioNotFound
@@ -14,7 +16,7 @@ from finances.models import dto
 from finances.services.crypto_portfolio import add_crypto_portfolio, \
     get_crypto_portfolio_by_id, change_crypto_portfolio, \
     delete_crypto_portfolio, get_base_crypto_portfolio, \
-    set_base_crypto_portfolio
+    set_base_crypto_portfolio, get_total_by_portfolio
 
 
 async def get_crypto_portfolio_by_id_route(
@@ -125,12 +127,25 @@ async def set_base_crypto_portfolio_route(
     raise HTTPException(status_code=status.HTTP_200_OK)
 
 
+async def get_total_by_portfolio_route(
+        portfolio_id: UUID = Query(),
+        current_user: dto.User = Depends(get_current_user),
+        dao: DAO = Depends(dao_provider),
+        currency_api: CurrencyAPI = Depends(currency_api_provider)
+) -> TotalResult:
+    total = await get_total_by_portfolio(portfolio_id, current_user, dao,
+                                         currency_api)
+    return TotalResult(total=total)
+
+
 def get_crypto_portfolio_router() -> APIRouter:
     router = APIRouter()
     router.add_api_route('/add', add_crypto_portfolio_route, methods=['POST'])
     router.add_api_route('/change', change_crypto_portfolio_route,
                          methods=['PUT'])
     router.add_api_route('/all', get_all_crypto_portfolios_route,
+                         methods=['GET'])
+    router.add_api_route('/totalPrice', get_total_by_portfolio_route,
                          methods=['GET'])
     router.add_api_route('/baseCryptoportfolio',
                          get_base_crypto_portfolio_route,
