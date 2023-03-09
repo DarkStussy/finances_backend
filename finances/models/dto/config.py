@@ -27,3 +27,4 @@ class AuthConfig:
 class Config:
     db: DatabaseConfig
     auth: AuthConfig
+    fcsapi_access_key: str

@@ -1,3 +1,6 @@
+from datetime import date
+
+from api.v1.dependencies import FCSAPI
 from finances.database.dao import DAO
 from finances.database.dao.transaction_category import TransactionCategoryDAO
 from finances.exceptions.transaction import TransactionCategoryNotFound, \
@@ -6,7 +9,9 @@ from finances.models import dto
 from finances.models.enums.transaction_type import TransactionType
 
 from .asset import get_asset_by_id
+from .currency_prices import get_prices
 from ..database.dao.transaction import TransactionDAO
+from ..models.dto import TotalByCategory
 
 
 # transaction category
@@ -210,3 +215,71 @@ async def delete_transaction(
         user.id
     )
     await dao.commit()
+
+
+async def get_total_transactions_by_period(
+        start_date: date,
+        end_date: date,
+        transaction_type: TransactionType,
+        user: dto.User,
+        fcsapi: FCSAPI,
+        dao: DAO
+):
+    currencies_amount = await dao.transaction.get_total_by_period(
+        user,
+        start_date,
+        end_date,
+        transaction_type.value
+    )
+    if not currencies_amount:
+        return 0
+
+    currencies_codes = set(
+        [currency for currency, value in currencies_amount.items() if
+         value[0] is None])
+    base_currency = await dao.user.get_base_currency(user)
+    prices = await get_prices(base_currency, currencies_codes, fcsapi)
+
+    return round(sum([
+        value[1] / prices[code] if value[0] is None else value[1] / value[0]
+        for code, value in currencies_amount.items()
+    ]), 2)
+
+
+async def get_total_categories_by_period(
+        start_date: date,
+        end_date: date,
+        transaction_type: TransactionType,
+        user: dto.User,
+        fcsapi: FCSAPI,
+        dao: DAO
+) -> list[TotalByCategory]:
+    totals_cat_and_cur = await dao.transaction.get_total_categories_by_period(
+        user, start_date, end_date, transaction_type.value
+    )
+    if not totals_cat_and_cur:
+        return []
+    currencies_codes = set(
+        total_cat_and_cur.currency_code for total_cat_and_cur in
+        totals_cat_and_cur if total_cat_and_cur.rate_to_base_currency is None)
+
+    base_currency = await dao.user.get_base_currency(user)
+    prices = await get_prices(base_currency, currencies_codes, fcsapi)
+    totals_by_category = {}
+    for total_cat_and_cur in totals_cat_and_cur:
+        category = totals_by_category.get(total_cat_and_cur.category)
+        rate = total_cat_and_cur.rate_to_base_currency \
+            if total_cat_and_cur.rate_to_base_currency \
+            else prices[total_cat_and_cur.currency_code]
+        total = total_cat_and_cur.total / rate
+        if category is None:
+            totals_by_category[
+                total_cat_and_cur.category] = total
+        else:
+            totals_by_category[
+                total_cat_and_cur.category] += total
+
+    return sorted([TotalByCategory(category=k, type=transaction_type.value,
+                                   total=round(v, 2))
+                   for k, v in totals_by_category.items()],
+                  key=lambda x: x.total, reverse=True)

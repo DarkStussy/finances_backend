@@ -18,6 +18,7 @@ def load_config() -> Config:
         ),
         auth=AuthConfig(
             secret_key=os.getenv('SECRET_KEY'),
-            token_expire=timedelta(days=1)
-        )
+            token_expire=timedelta(days=365)
+        ),
+        fcsapi_access_key=os.getenv('FCSAPI_API_KEY')
     )

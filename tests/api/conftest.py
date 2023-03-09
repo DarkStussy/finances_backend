@@ -38,7 +38,8 @@ from tests.fixtures.user_data import get_test_user
 def app(config: Config, sessionmaker: async_sessionmaker) -> FastAPI:
     app = create_app()
     api_router_v1 = APIRouter()
-    v1.dependencies.setup(app, api_router_v1, sessionmaker, config)
+    v1.dependencies.setup(app, api_router_v1, sessionmaker, config,
+                          None)  # noqa
     v1.routes.setup_routers(api_router_v1)
     main_api_router = APIRouter(prefix='/api')
     main_api_router.include_router(api_router_v1, prefix='/v1')

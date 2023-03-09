@@ -8,3 +8,5 @@ from .crypto_portfolio import CryptoPortfolio
 from .crypto_currency import CryptoCurrency
 from .crypto_asset import CryptoAsset
 from .crypto_transaction import CryptoTransaction
+from .total_results import TotalByCategoryAndCurrency, TotalByCategory, \
+    Transactions

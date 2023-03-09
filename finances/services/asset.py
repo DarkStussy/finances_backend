@@ -1,10 +1,13 @@
 from uuid import UUID
 
+from api.v1.dependencies import FCSAPI
+from finances.database.dao import DAO
 from finances.database.dao.asset import AssetDAO
 from finances.database.dao.currency import CurrencyDAO
 from finances.exceptions.asset import AssetNotFound
 from finances.exceptions.currency import CurrencyNotFound
 from finances.models import dto
+from finances.services.currency_prices import get_prices
 
 
 async def get_asset_by_id(
@@ -69,3 +72,30 @@ async def delete_asset(
     deleted_asset_dto.deleted = True
     await asset_dao.merge(deleted_asset_dto)
     await asset_dao.commit()
+
+
+async def get_total_assets(
+        fcsapi: FCSAPI,
+        user: dto.User,
+        dao: DAO
+) -> float:
+    assets = await dao.asset.get_all(user)
+    if not assets:
+        return 0
+
+    currencies_codes = set(
+        asset.currency.code for asset in assets if
+        asset.currency and not asset.currency.is_custom)
+    base_currency = await dao.user.get_base_currency(user)
+    prices = await get_prices(base_currency, currencies_codes, fcsapi)
+    amounts = []
+    for asset in assets:
+        if asset.currency:
+            if asset.currency.is_custom:
+                amounts.append(
+                    asset.amount / asset.currency.rate_to_base_currency)
+            else:
+                amounts.append(
+                    asset.amount / prices.get(asset.currency.code, 1))
+
+    return round(sum(amounts), 2)

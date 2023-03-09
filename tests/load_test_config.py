@@ -19,5 +19,6 @@ def load_test_config() -> Config:
         auth=AuthConfig(
             secret_key=os.getenv('TEST_SECRET_KEY'),
             token_expire=timedelta(days=1)
-        )
+        ),
+        fcsapi_access_key=os.getenv('FCSAPI_API_KEY')
     )
