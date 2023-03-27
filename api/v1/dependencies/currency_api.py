@@ -42,7 +42,8 @@ class CurrencyAPI:
                 'symbol': ','.join(
                     f'{base_currency}/{currency}' for currency in currencies),
                 'access_key': self.fcsapi.access_key
-            }
+            },
+            timeout=10
         )
         response_json = response.json()
         status = response_json.get('status', False)

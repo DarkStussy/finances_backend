@@ -234,7 +234,6 @@ async def get_total_transactions_by_period(
         transaction_type.value,
         asset_id
     )
-    print(currencies_amount)
     if not currencies_amount:
         return 0
 
