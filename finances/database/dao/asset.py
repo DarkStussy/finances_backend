@@ -29,7 +29,7 @@ class AssetDAO(BaseDAO[Asset]):
         result = await self.session.execute(
             select(Asset).where(Asset.user_id == user_dto.id,
                                 Asset.deleted.is_(False)).options(
-                joinedload(Asset.currency))
+                joinedload(Asset.currency)).order_by(Asset.title)
         )
         return [asset.to_dto(with_currency=bool(asset.currency_id)) for asset
                 in result.scalars().all()]

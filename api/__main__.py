@@ -18,7 +18,7 @@ def main():
     # app = FastAPI(swagger_ui_parameters={"defaultModelsExpandDepth": -1})
     app = create_app()
     config = load_config()
-    engine = create_async_engine(url=config.db.make_url, echo=True)
+    engine = create_async_engine(url=config.db.make_url, echo=False)
     async_session = async_sessionmaker(engine, expire_on_commit=False)
 
     client = httpx.AsyncClient()

@@ -13,6 +13,7 @@ from api.v1.models.response.total_result import TotalResult, \
 from api.v1.models.response.transaction import TransactionResponse
 from finances.database.dao import DAO
 from finances.exceptions.asset import AssetNotFound, AssetCantBeDeleted
+from finances.exceptions.currency import CurrencyNotFound
 from finances.exceptions.transaction import TransactionCategoryNotFound, \
     AddTransactionError, TransactionNotFound, MergeTransactionError, \
     TransactionCantBeChanged, TransactionCantBeDeleted
@@ -67,7 +68,7 @@ async def add_transaction_route(
             current_user,
             dao
         )
-    except (AssetNotFound, TransactionCategoryNotFound) as e:
+    except (CurrencyNotFound, AssetNotFound, TransactionCategoryNotFound) as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=e.message)
     except AddTransactionError as e:
@@ -90,7 +91,7 @@ async def change_transaction_route(
     except (MergeTransactionError, TransactionCantBeChanged) as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=e.message)
-    except (TransactionNotFound, TransactionCategoryNotFound,
+    except (CurrencyNotFound, TransactionNotFound, TransactionCategoryNotFound,
             AssetNotFound) as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=e.message)
