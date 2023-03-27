@@ -1,4 +1,5 @@
 from datetime import date
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from starlette import status
@@ -42,6 +43,7 @@ async def get_all_transactions_route(
         start_date: date = Query(alias='startDate'),
         end_date: date = Query(alias='endDate'),
         transaction_type: TransactionType = Query(default=None, alias='type'),
+        asset_id: UUID = Query(default=None),
         current_user: dto.User = Depends(get_current_user),
         dao: DAO = Depends(dao_provider)
 ) -> list[TransactionsResponse]:
@@ -49,7 +51,8 @@ async def get_all_transactions_route(
         current_user,
         start_date,
         end_date,
-        transaction_type.value if transaction_type else None
+        transaction_type.value if transaction_type else None,
+        asset_id=asset_id
     )
 
 
@@ -116,6 +119,7 @@ async def get_total_transactions_by_period_route(
         start_date: date = Query(alias='startDate'),
         end_date: date = Query(alias='endDate'),
         transaction_type: TransactionType = Query(alias='type'),
+        asset_id: UUID = Query(default=None),
         current_user: dto.User = Depends(get_current_user),
         currency_api: CurrencyAPI = Depends(currency_api_provider),
         dao: DAO = Depends(dao_provider)
@@ -124,6 +128,7 @@ async def get_total_transactions_by_period_route(
         start_date,
         end_date,
         transaction_type,
+        asset_id,
         current_user,
         currency_api,
         dao

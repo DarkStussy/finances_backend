@@ -33,7 +33,8 @@ class TransactionDAO(BaseDAO[Transaction]):
             user_dto: dto.User,
             start_date: date,
             end_date: date,
-            transaction_type: str | None = None
+            transaction_type: str | None = None,
+            asset_id: UUID | None = None
     ) -> list[dto.Transactions]:
         stmt = select(Transaction.created).where(
             Transaction.user_id == user_dto.id).filter(
@@ -43,6 +44,9 @@ class TransactionDAO(BaseDAO[Transaction]):
         if transaction_type:
             stmt = stmt.where(Transaction.category.has(
                 TransactionCategory.type == transaction_type))
+        if asset_id:
+            stmt = stmt.where(Transaction.asset_id == asset_id)
+
         result = await self.session.execute(stmt)
         transactions = []
         for created in result.fetchall():
@@ -75,7 +79,8 @@ class TransactionDAO(BaseDAO[Transaction]):
             user_dto: dto.User,
             start_date: date,
             end_date: date,
-            transaction_type: str
+            transaction_type: str,
+            asset_id: UUID | None = None
     ) -> dict[str, Decimal]:
         stmt = select(Currency.code, Currency.rate_to_base_currency,
                       func.sum(Transaction.amount).label('total')) \
@@ -87,6 +92,9 @@ class TransactionDAO(BaseDAO[Transaction]):
             .where(Transaction.category.has(TransactionCategory.type ==
                                             transaction_type),
                    Transaction.user_id == user_dto.id)
+        if asset_id:
+            stmt = stmt.where(Transaction.asset_id == asset_id)
+
         result = await self.session.execute(stmt)
         result = result.fetchall()
         return {currency[0]: (currency[1], currency[2]) for currency in result}

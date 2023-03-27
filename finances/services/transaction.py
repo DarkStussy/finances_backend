@@ -1,4 +1,5 @@
 from datetime import date
+from uuid import UUID
 
 from api.v1.dependencies import CurrencyAPI
 from finances.database.dao import DAO
@@ -221,6 +222,7 @@ async def get_total_transactions_by_period(
         start_date: date,
         end_date: date,
         transaction_type: TransactionType,
+        asset_id: UUID | None,
         user: dto.User,
         currency_api: CurrencyAPI,
         dao: DAO
@@ -229,7 +231,8 @@ async def get_total_transactions_by_period(
         user,
         start_date,
         end_date,
-        transaction_type.value
+        transaction_type.value,
+        asset_id
     )
     if not currencies_amount:
         return 0
