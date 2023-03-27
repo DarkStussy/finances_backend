@@ -74,27 +74,6 @@ async def delete_asset(
     await asset_dao.commit()
 
 
-async def get_total_asset(
-        asset_id: UUID,
-        currency_api: CurrencyAPI,
-        user: dto.User,
-        dao: DAO):
-    asset_dto = await dao.asset.get_by_id(asset_id)
-    if asset_dto is None or asset_dto.user_id != user.id:
-        raise AssetNotFound
-
-    base_currency = await dao.user.get_base_currency(user)
-    if asset_dto.currency is None:
-        return asset_dto.amount
-    elif asset_dto.currency.is_custom:
-        return round(
-            asset_dto.amount / asset_dto.currency.rate_to_base_currency, 2)
-
-    prices = await get_prices(base_currency, {asset_dto.currency.code},
-                              currency_api)
-    return round(asset_dto.amount / prices[asset_dto.currency.code], 2)
-
-
 async def get_total_assets(
         currency_api: CurrencyAPI,
         user: dto.User,

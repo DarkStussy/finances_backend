@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
 
 from api.v1.dependencies import get_current_user, dao_provider, CurrencyAPI, \
@@ -8,13 +8,13 @@ from api.v1.dependencies import get_current_user, dao_provider, CurrencyAPI, \
 from api.v1.dependencies.currency_api import CantGetPrice
 from api.v1.models.request.asset import AssetCreate, AssetChange
 from api.v1.models.response.asset import AssetResponse
-from api.v1.models.response.total_result import TotalResult, TotalAssetResult
+from api.v1.models.response.total_result import TotalResult
 from finances.database.dao import DAO
 from finances.exceptions.asset import AssetNotFound, AssetExists
 from finances.exceptions.currency import CurrencyNotFound
 from finances.models import dto
 from finances.services.asset import add_new_asset, get_asset_by_id, \
-    change_asset, delete_asset, get_total_assets, get_total_asset
+    change_asset, delete_asset, get_total_assets
 
 
 async def get_asset_by_id_route(
@@ -83,24 +83,6 @@ async def delete_asset_route(
     raise HTTPException(status_code=status.HTTP_200_OK)
 
 
-async def get_total_asset_route(
-        asset_id: UUID = Query(),
-        currency_api: CurrencyAPI = Depends(currency_api_provider),
-        current_user: dto.User = Depends(get_current_user),
-        dao: DAO = Depends(dao_provider)
-) -> TotalAssetResult:
-    try:
-        total = await get_total_asset(asset_id, currency_api, current_user,
-                                      dao)
-    except AssetNotFound as e:
-        raise HTTPException(status_code=404, detail=e.message)
-    except CantGetPrice:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                            detail='Unable to calculate total price')
-    else:
-        return TotalAssetResult(asset_id=asset_id, total=total)
-
-
 async def get_total_assets_route(
         currency_api: CurrencyAPI = Depends(currency_api_provider),
         current_user: dto.User = Depends(get_current_user),
@@ -122,7 +104,6 @@ def get_asset_router() -> APIRouter:
     router.add_api_route('/all', get_all_assets_route, methods=['GET'])
     router.add_api_route('/totalPrices', get_total_assets_route,
                          methods=['GET'])
-    router.add_api_route('/total', get_total_asset_route, methods=['GET'])
     router.add_api_route('/{asset_id}', delete_asset_route,
                          methods=['DELETE'])
     router.add_api_route('/{asset_id}', get_asset_by_id_route, methods=['GET'])
