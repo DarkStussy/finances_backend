@@ -63,6 +63,9 @@ class TransactionDAO(BaseDAO[Transaction]):
                 stmt = stmt.where(Transaction.category.has(
                     TransactionCategory.type == transaction_type))
 
+            if asset_id:
+                stmt = stmt.where(Transaction.asset_id == asset_id)
+
             result = await self.session.execute(stmt)
             transactions.append(
                 dto.Transactions(

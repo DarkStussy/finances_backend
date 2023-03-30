@@ -118,7 +118,8 @@ class Asset(Base):
             currency_id=self.currency_id,
             amount=self.amount,
             deleted=self.deleted,
-            currency=self.currency.to_dto() if with_currency else None,
+            currency=self.currency.to_dto()
+            if with_currency and self.currency_id else None,
         )
 
     @classmethod
@@ -202,8 +203,10 @@ class Transaction(Base):
             category_id=self.category_id,
             amount=self.amount,
             created=self.created,
-            asset=self.asset.to_dto() if with_asset else None,
-            category=self.category.to_dto() if with_category else None
+            asset=self.asset.to_dto()
+            if with_asset and self.asset_id else None,
+            category=self.category.to_dto()
+            if with_category and self.category_id else None
         )
 
     @classmethod
@@ -325,8 +328,8 @@ class CryptoAsset(Base):
             portfolio_id=self.portfolio_id,
             crypto_currency_id=self.crypto_currency_id,
             amount=self.amount,
-            crypto_currency=self.crypto_currency.to_dto() if with_currency else
-            None
+            crypto_currency=self.crypto_currency.to_dto()
+            if with_currency and self.crypto_currency_id else None
         )
 
     @classmethod
