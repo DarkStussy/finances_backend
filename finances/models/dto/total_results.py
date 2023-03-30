@@ -24,4 +24,6 @@ class TotalByCategory:
 @dataclass
 class Transactions:
     created: date
+    total_income: Decimal
+    total_expense: Decimal
     transactions: list[Transaction]

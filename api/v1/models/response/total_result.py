@@ -21,4 +21,6 @@ class TotalAssetResult:
 @dataclass
 class TransactionsResponse:
     created: date
+    total_income: float
+    total_expense: float
     transactions: list[TransactionResponse]

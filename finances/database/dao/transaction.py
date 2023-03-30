@@ -13,6 +13,7 @@ from finances.exceptions.base import MergeModelError, AddModelError
 from finances.exceptions.transaction import AddTransactionError, \
     TransactionNotFound, MergeTransactionError
 from finances.models import dto
+from finances.models.enums.transaction_type import TransactionType
 
 
 class TransactionDAO(BaseDAO[Transaction]):
@@ -67,11 +68,23 @@ class TransactionDAO(BaseDAO[Transaction]):
                 stmt = stmt.where(Transaction.asset_id == asset_id)
 
             result = await self.session.execute(stmt)
+            total_expense = Decimal('0')
+            total_income = Decimal('0')
+            local_transactions = []
+            for transaction in result.scalars().all():
+                transaction_dto: dto.Transaction = transaction.to_dto()
+                local_transactions.append(transaction_dto)
+                if transaction_dto.category.type == TransactionType.INCOME:
+                    total_income += transaction_dto.amount
+                elif transaction_dto.category.type == TransactionType.EXPENSE:
+                    total_expense += transaction_dto.amount
+
             transactions.append(
                 dto.Transactions(
                     created=created[0].date(),
-                    transactions=[transaction.to_dto() for transaction in
-                                  result.scalars().all()]
+                    total_income=total_income,
+                    total_expense=total_expense,
+                    transactions=local_transactions
                 )
             )
 
