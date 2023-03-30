@@ -27,3 +27,9 @@ class Transactions:
     total_income: Decimal
     total_expense: Decimal
     transactions: list[Transaction]
+
+
+@dataclass
+class TotalsByAsset:
+    income: Decimal
+    expense: Decimal

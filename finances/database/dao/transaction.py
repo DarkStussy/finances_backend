@@ -178,3 +178,16 @@ class TransactionDAO(BaseDAO[Transaction]):
         transaction = transaction.scalar()
         return transaction.to_dto(
             with_asset=False, with_category=False) if transaction else None
+
+    async def get_totals_by_asset(self, asset_id: UUID, start_date: date,
+                                  end_date: date) -> dto.TotalsByAsset:
+        stmt = select(TransactionCategory.type, func.sum(Transaction.amount)) \
+            .join(Transaction.category) \
+            .where(Transaction.asset_id == asset_id) \
+            .group_by(TransactionCategory.type) \
+            .filter(Transaction.created >= start_date,
+                    Transaction.created <= end_date)
+        result = await self.session.execute(stmt)
+        totals = {'income': Decimal('0'), 'expense': Decimal('0')}
+        totals |= {cat_type: amount for cat_type, amount in result.fetchall()}
+        return dto.TotalsByAsset(**totals)

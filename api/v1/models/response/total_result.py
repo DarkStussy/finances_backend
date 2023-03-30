@@ -1,3 +1,4 @@
+from _decimal import Decimal
 from dataclasses import dataclass
 from datetime import datetime, date
 from uuid import UUID
@@ -24,3 +25,11 @@ class TransactionsResponse:
     total_income: float
     total_expense: float
     transactions: list[TransactionResponse]
+
+
+@dataclass
+class TotalByAssetResponse:
+    asset_id: UUID
+    total_income: Decimal
+    total_expense: Decimal
+    server_time: datetime = datetime.utcnow()

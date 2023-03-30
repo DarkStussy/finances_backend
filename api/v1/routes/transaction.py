@@ -9,7 +9,7 @@ from api.v1.dependencies import get_current_user, dao_provider, CurrencyAPI, \
 from api.v1.models.request.transaction import TransactionCreate, \
     TransactionChange
 from api.v1.models.response.total_result import TotalResult, \
-    TransactionsResponse
+    TransactionsResponse, TotalByAssetResponse
 from api.v1.models.response.transaction import TransactionResponse
 from finances.database.dao import DAO
 from finances.exceptions.asset import AssetNotFound, AssetCantBeDeleted
@@ -21,7 +21,8 @@ from finances.models import dto
 from finances.models.enums.transaction_type import TransactionType
 from finances.services.transaction import add_transaction, \
     get_transaction_by_id, change_transaction, delete_transaction, \
-    get_total_transactions_by_period, get_total_categories_by_period
+    get_total_transactions_by_period, get_total_categories_by_period, \
+    get_totals_by_asset
 
 
 async def get_transaction_by_id_route(
@@ -155,6 +156,26 @@ async def get_total_categories_by_period_route(
     )
 
 
+async def get_totals_by_asset_route(
+        start_date: date = Query(alias='startDate'),
+        end_date: date = Query(alias='endDate'),
+        asset_id: UUID = Query(default=None),
+        current_user: dto.User = Depends(get_current_user),
+        dao: DAO = Depends(dao_provider)
+):
+    try:
+        totals = await get_totals_by_asset(start_date, end_date, asset_id,
+                                           current_user, dao)
+    except AssetNotFound as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=e.message)
+    return TotalByAssetResponse(
+        asset_id=asset_id,
+        total_income=totals.income,
+        total_expense=totals.expense
+    )
+
+
 def get_transaction_router() -> APIRouter:
     router = APIRouter()
     router.add_api_route('/add', add_transaction_route, methods=['POST'])
@@ -165,6 +186,8 @@ def get_transaction_router() -> APIRouter:
                          methods=['GET'])
     router.add_api_route('/totalCategoriesByPeriod',
                          get_total_categories_by_period_route,
+                         methods=['GET'])
+    router.add_api_route('/totalsByAsset', get_totals_by_asset_route,
                          methods=['GET'])
     router.add_api_route('/{transaction_id}', delete_transaction_route,
                          methods=['DELETE'])

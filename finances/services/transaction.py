@@ -12,6 +12,7 @@ from finances.models.enums.transaction_type import TransactionType
 from .asset import get_asset_by_id
 from .currency_prices import get_prices
 from ..database.dao.transaction import TransactionDAO
+from ..exceptions.asset import AssetNotFound
 from ..models.dto import TotalByCategory
 
 
@@ -286,3 +287,18 @@ async def get_total_categories_by_period(
                                    total=round(v, 2))
                    for k, v in totals_by_category.items()],
                   key=lambda x: x.total, reverse=True)
+
+
+async def get_totals_by_asset(
+        start_date: date,
+        end_date: date,
+        asset_id: UUID | None,
+        user: dto.User,
+        dao: DAO
+) -> dto.TotalsByAsset:
+    asset_dto = await dao.asset.get_by_id(asset_id)
+    if asset_dto.user_id != user.id:
+        raise AssetNotFound
+
+    return await dao.transaction.get_totals_by_asset(asset_id, start_date,
+                                                     end_date)
