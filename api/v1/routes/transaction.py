@@ -50,13 +50,22 @@ async def get_all_transactions_route(
         current_user: dto.User = Depends(get_current_user),
         dao: DAO = Depends(dao_provider)
 ) -> list[TransactionsResponse]:
-    return await dao.transaction.get_all(
+    transactions = await dao.transaction.get_all(
         current_user,
         start_date,
         end_date,
         transaction_type.value if transaction_type else None,
         asset_id=asset_id
     )
+    if asset_id is None:
+        return [
+            TransactionsResponse(
+                created=item.created,
+                transactions=item.transactions
+            )
+            for item in transactions
+        ]
+    return transactions
 
 
 async def add_transaction_route(
