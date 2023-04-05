@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from _decimal import Decimal
+from decimal import Decimal
 from dataclasses import dataclass
 from uuid import UUID
 from .currency import Currency

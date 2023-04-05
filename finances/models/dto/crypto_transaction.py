@@ -1,5 +1,5 @@
 from __future__ import annotations
-from _decimal import Decimal
+from decimal import Decimal
 from dataclasses import dataclass
 from datetime import datetime
 from uuid import UUID

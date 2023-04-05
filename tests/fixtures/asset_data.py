@@ -1,4 +1,4 @@
-from _decimal import Decimal
+from decimal import Decimal
 from uuid import UUID
 
 from finances.models import dto

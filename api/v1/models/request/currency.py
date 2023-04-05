@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from _decimal import Decimal
+from decimal import Decimal
 
 from pydantic import BaseModel, Field
 

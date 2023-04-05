@@ -1,4 +1,4 @@
-from _decimal import Decimal
+from decimal import Decimal
 
 from api.v1.dependencies import CurrencyAPI
 from finances.database.dao.crypto_currency import CryptoCurrencyDAO

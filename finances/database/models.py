@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from _decimal import Decimal
+from decimal import Decimal
 from datetime import datetime
 from typing import Optional
 
