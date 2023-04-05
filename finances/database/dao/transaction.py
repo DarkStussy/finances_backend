@@ -2,7 +2,7 @@ from decimal import Decimal
 from datetime import date
 from uuid import UUID
 
-from sqlalchemy import select, delete, func
+from sqlalchemy import select, delete, func, cast, Date
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
@@ -37,11 +37,13 @@ class TransactionDAO(BaseDAO[Transaction]):
             transaction_type: str | None = None,
             asset_id: UUID | None = None
     ) -> list[dto.Transactions]:
-        stmt = select(Transaction.created).where(
+        created_date = cast(Transaction.created, Date).label('created_date')
+        stmt = select(
+            created_date).where(
             Transaction.user_id == user_dto.id).filter(
             Transaction.created >= start_date,
             Transaction.created <= end_date).order_by(
-            Transaction.created.desc()).distinct()
+            created_date.desc()).distinct()
         if transaction_type:
             stmt = stmt.where(Transaction.category.has(
                 TransactionCategory.type == transaction_type))
@@ -54,9 +56,9 @@ class TransactionDAO(BaseDAO[Transaction]):
             stmt = select(Transaction) \
                 .where(
                 Transaction.user_id == user_dto.id,
-                Transaction.created == created[0]
+                created_date == created[0]
             ) \
-                .order_by(Transaction.created.desc(), Transaction.id.desc()) \
+                .order_by(created_date.desc(), Transaction.id.desc()) \
                 .options(
                 joinedload(Transaction.asset).joinedload(Asset.currency),
                 joinedload(Transaction.category))
@@ -81,7 +83,7 @@ class TransactionDAO(BaseDAO[Transaction]):
 
             transactions.append(
                 dto.Transactions(
-                    created=created[0].date(),
+                    created=created[0],
                     total_income=total_income,
                     total_expense=total_expense,
                     transactions=local_transactions
