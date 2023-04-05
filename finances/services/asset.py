@@ -1,13 +1,11 @@
 from uuid import UUID
 
-from api.v1.dependencies import CurrencyAPI
 from finances.database.dao import DAO
 from finances.database.dao.asset import AssetDAO
 from finances.database.dao.currency import CurrencyDAO
 from finances.exceptions.asset import AssetNotFound
 from finances.exceptions.currency import CurrencyNotFound
 from finances.models import dto
-from finances.services.currency_prices import get_prices
 
 
 async def get_asset_by_id(
@@ -76,7 +74,6 @@ async def delete_asset(
 
 async def get_total_asset(
         asset_id: UUID,
-        currency_api: CurrencyAPI,
         user: dto.User,
         dao: DAO):
     asset_dto = await dao.asset.get_by_id(asset_id)
@@ -87,14 +84,13 @@ async def get_total_asset(
     if asset_dto.currency.is_custom:
         return round(
             asset_dto.amount / asset_dto.currency.rate_to_base_currency, 2)
-
-    prices = await get_prices(base_currency, {asset_dto.currency.code},
-                              currency_api)
-    return round(asset_dto.amount / prices[asset_dto.currency.code], 2)
+    currency_price = await dao.currency_price.get_by_id(
+        getattr(base_currency, 'code', 'USD'),
+        asset_dto.currency.code)
+    return round(asset_dto.amount / currency_price.price, 2)
 
 
 async def get_total_assets(
-        currency_api: CurrencyAPI,
         user: dto.User,
         dao: DAO
 ) -> float:
@@ -102,19 +98,25 @@ async def get_total_assets(
     if not assets:
         return 0
 
-    currencies_codes = set(
+    currencies_codes = [
         asset.currency.code for asset in assets if
-        asset.currency and not asset.currency.is_custom)
+        asset.currency and not asset.currency.is_custom
+    ]
     base_currency = await dao.user.get_base_currency(user)
-    prices = await get_prices(base_currency, currencies_codes, currency_api)
-    amounts = []
+    prices = await dao.currency_price.get_prices(
+        getattr(base_currency, 'code', 'USD'), currencies_codes)
+    amount = 0
     for asset in assets:
         if asset.currency:
             if asset.currency.is_custom:
-                amounts.append(
-                    asset.amount / asset.currency.rate_to_base_currency)
+                amount += asset.amount / asset.currency.rate_to_base_currency
             else:
-                amounts.append(
-                    asset.amount / prices.get(asset.currency.code, 1))
+                currency_price = prices.get(asset.currency.code)
+                if currency_price is None:
+                    rate = 1
+                else:
+                    rate = currency_price.price
 
-    return round(sum(amounts), 2)
+                amount += asset.amount / rate
+
+    return round(amount, 2)

@@ -5,6 +5,7 @@ from starlette import status
 
 from api.v1.dependencies import get_current_user, dao_provider, CurrencyAPI, \
     currency_api_provider
+from api.v1.dependencies.currency_api import CantGetPrice
 from api.v1.models.request.crypto_portfolio import CryptoPortfolioCreate, \
     CryptoPortfolioChange
 from api.v1.models.response.crypto_portfolio import CryptoPortfolioResponse
@@ -133,9 +134,14 @@ async def get_total_by_portfolio_route(
         dao: DAO = Depends(dao_provider),
         currency_api: CurrencyAPI = Depends(currency_api_provider)
 ) -> TotalResult:
-    total = await get_total_by_portfolio(portfolio_id, current_user, dao,
-                                         currency_api)
-    return TotalResult(total=total)
+    try:
+        total = await get_total_by_portfolio(portfolio_id, current_user, dao,
+                                             currency_api)
+    except CantGetPrice:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                            detail='Unable to calculate total price')
+    else:
+        return TotalResult(total=total)
 
 
 def get_crypto_portfolio_router() -> APIRouter:

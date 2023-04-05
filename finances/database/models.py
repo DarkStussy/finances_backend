@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import String, Integer, ForeignKey, Numeric, Boolean, \
-    BigInteger, DateTime, UniqueConstraint
+    BigInteger, DateTime, UniqueConstraint, func, FetchedValue
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
 
@@ -168,6 +168,35 @@ class Currency(Base):
             is_custom=currency_dto.is_custom,
             rate_to_base_currency=currency_dto.rate_to_base_currency,
             user_id=currency_dto.user_id,
+        )
+
+
+class CurrencyPrice(Base):
+    __tablename__ = 'currency_price'
+
+    base: Mapped[str] = mapped_column(String, primary_key=True)
+    quote: Mapped[str] = mapped_column(String, primary_key=True)
+    price: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
+    updated: Mapped[datetime] = mapped_column(DateTime, onupdate=func.now(),
+                                              server_default=FetchedValue(),
+                                              server_onupdate=FetchedValue())
+
+    __mapper_args__ = {'eager_defaults': True}
+
+    def to_dto(self) -> dto.CurrencyPrice:
+        return dto.CurrencyPrice(
+            base=self.base,
+            quote=self.quote,
+            price=self.price,
+            updated=self.updated
+        )
+
+    @classmethod
+    def from_dto(cls, currency_price_dto: dto.CurrencyPrice) -> CurrencyPrice:
+        return CurrencyPrice(
+            base=currency_price_dto.base,
+            quote=currency_price_dto.quote,
+            price=currency_price_dto.price
         )
 
 

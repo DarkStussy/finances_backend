@@ -1,7 +1,7 @@
 from datetime import date
 from uuid import UUID
 
-from api.v1.dependencies import CurrencyAPI
+
 from finances.database.dao import DAO
 from finances.database.dao.transaction_category import TransactionCategoryDAO
 from finances.exceptions.transaction import TransactionCategoryNotFound, \
@@ -10,7 +10,6 @@ from finances.models import dto
 from finances.models.enums.transaction_type import TransactionType
 
 from .asset import get_asset_by_id
-from .currency_prices import get_prices
 from ..database.dao.transaction import TransactionDAO
 from ..exceptions.asset import AssetNotFound
 from ..models.dto import TotalByCategory
@@ -225,7 +224,6 @@ async def get_total_transactions_by_period(
         transaction_type: TransactionType,
         asset_id: UUID | None,
         user: dto.User,
-        currency_api: CurrencyAPI,
         dao: DAO
 ) -> float:
     currencies_amount = await dao.transaction.get_total_by_period(
@@ -238,16 +236,30 @@ async def get_total_transactions_by_period(
     if not currencies_amount:
         return 0
 
-    currencies_codes = set(
-        [currency for currency, value in currencies_amount.items() if
-         value[0] is None])
     base_currency = await dao.user.get_base_currency(user)
-    prices = await get_prices(base_currency, currencies_codes, currency_api)
+    base_currency_code = getattr(base_currency, 'code', 'USD')
+    currencies_codes = [
+        currency for currency, value in currencies_amount.items()
+        if value[0] is None and currency != base_currency_code
+    ]
+    prices = await dao.currency_price.get_prices(
+        base_currency_code, currencies_codes)
+    total = 0
 
-    return round(sum([
-        value[1] / prices[code] if value[0] is None else value[1] / value[0]
-        for code, value in currencies_amount.items()
-    ]), 2)
+    for code, (custom_rate, amount) in currencies_amount.items():
+        if custom_rate is not None:
+            total += amount / custom_rate
+            continue
+
+        currency_price = prices.get(code)
+        if currency_price is None:
+            rate = 1
+        else:
+            rate = currency_price.price
+
+        total += amount / rate
+
+    return round(total, 2)
 
 
 async def get_total_categories_by_period(
@@ -255,7 +267,6 @@ async def get_total_categories_by_period(
         end_date: date,
         transaction_type: TransactionType,
         user: dto.User,
-        currency_api: CurrencyAPI,
         dao: DAO
 ) -> list[TotalByCategory]:
     totals_cat_and_cur = await dao.transaction.get_total_categories_by_period(
@@ -263,18 +274,26 @@ async def get_total_categories_by_period(
     )
     if not totals_cat_and_cur:
         return []
-    currencies_codes = set(
+    currencies_codes = [
         total_cat_and_cur.currency_code for total_cat_and_cur in
-        totals_cat_and_cur if total_cat_and_cur.rate_to_base_currency is None)
+        totals_cat_and_cur if total_cat_and_cur.rate_to_base_currency is None
+    ]
 
     base_currency = await dao.user.get_base_currency(user)
-    prices = await get_prices(base_currency, currencies_codes, currency_api)
+    prices = await dao.currency_price.get_prices(
+        getattr(base_currency, 'code', 'USD'), currencies_codes)
+
     totals_by_category = {}
     for total_cat_and_cur in totals_cat_and_cur:
         category = totals_by_category.get(total_cat_and_cur.category)
-        rate = total_cat_and_cur.rate_to_base_currency \
-            if total_cat_and_cur.rate_to_base_currency \
-            else prices[total_cat_and_cur.currency_code]
+        rate = total_cat_and_cur.rate_to_base_currency
+        if rate is None:
+            currency_price = prices.get(total_cat_and_cur.currency_code)
+            if currency_price is None:
+                rate = 1
+            else:
+                rate = currency_price.price
+
         total = total_cat_and_cur.total / rate
         if category is None:
             totals_by_category[
@@ -283,10 +302,9 @@ async def get_total_categories_by_period(
             totals_by_category[
                 total_cat_and_cur.category] += total
 
-    return sorted([TotalByCategory(category=k, type=transaction_type.value,
-                                   total=round(v, 2))
-                   for k, v in totals_by_category.items()],
-                  key=lambda x: x.total, reverse=True)
+    return [TotalByCategory(category=cat, type=transaction_type.value,
+                            total=round(total, 2))
+            for cat, total in totals_by_category.items()]
 
 
 async def get_totals_by_asset(

@@ -4,9 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query
 from starlette import status
 
-from api.v1.dependencies import get_current_user, dao_provider, CurrencyAPI, \
-    currency_api_provider
-from api.v1.dependencies.currency_api import CantGetPrice
+from api.v1.dependencies import get_current_user, dao_provider
 from api.v1.models.request.transaction import TransactionCreate, \
     TransactionChange
 from api.v1.models.response.total_result import TotalResult, \
@@ -133,23 +131,17 @@ async def get_total_transactions_by_period_route(
         transaction_type: TransactionType = Query(alias='type'),
         asset_id: UUID = Query(default=None),
         current_user: dto.User = Depends(get_current_user),
-        currency_api: CurrencyAPI = Depends(currency_api_provider),
         dao: DAO = Depends(dao_provider)
-) -> TotalResult:
-    try:
-        total = await get_total_transactions_by_period(
-            start_date,
-            end_date,
-            transaction_type,
-            asset_id,
-            current_user,
-            currency_api,
-            dao
-        )
-        return TotalResult(total=total)
-    except CantGetPrice:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                            detail='Unable to calculate total price')
+):
+    total = await get_total_transactions_by_period(
+        start_date,
+        end_date,
+        transaction_type,
+        asset_id,
+        current_user,
+        dao
+    )
+    return TotalResult(total=total)
 
 
 async def get_total_categories_by_period_route(
@@ -157,21 +149,15 @@ async def get_total_categories_by_period_route(
         end_date: date = Query(alias='endDate'),
         transaction_type: TransactionType = Query(alias='type'),
         current_user: dto.User = Depends(get_current_user),
-        currency_api: CurrencyAPI = Depends(currency_api_provider),
         dao: DAO = Depends(dao_provider)
 ) -> list[dto.TotalByCategory]:
-    try:
-        return await get_total_categories_by_period(
-            start_date,
-            end_date,
-            transaction_type,
-            current_user,
-            currency_api,
-            dao
-        )
-    except CantGetPrice:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                            detail='Unable to calculate total price')
+    return await get_total_categories_by_period(
+        start_date,
+        end_date,
+        transaction_type,
+        current_user,
+        dao
+    )
 
 
 async def get_totals_by_asset_route(

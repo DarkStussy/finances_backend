@@ -3,6 +3,7 @@ from starlette import status
 
 from api.v1.dependencies import dao_provider, CurrencyAPI, \
     currency_api_provider
+from api.v1.dependencies.currency_api import CantGetPrice
 from finances.database.dao import DAO
 from finances.exceptions.crypto_currency import CryptoCurrencyNotFound
 from finances.models import dto
@@ -44,6 +45,10 @@ async def get_crypto_currency_price_route(
     except CryptoCurrencyNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=e.message)
+    except CantGetPrice:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                            detail='Unable to calculate price')
+
 
 # async def add_crypto_currencies_route(
 #         dao: DAO = Depends(dao_provider)

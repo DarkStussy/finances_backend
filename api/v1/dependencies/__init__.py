@@ -9,15 +9,16 @@ from api.v1.dependencies.db import DatabaseProvider, dao_provider
 from finances.models.dto.config import Config
 
 
-def setup(app: FastAPI,
-          api_router: APIRouter,
-          db_sessionmaker: async_sessionmaker,
-          config: Config,
-          client: httpx.AsyncClient
-          ):
+def setup(
+        app: FastAPI,
+        api_router: APIRouter,
+        db_sessionmaker: async_sessionmaker,
+        config: Config,
+        client: httpx.AsyncClient
+):
     db_provider = DatabaseProvider(session=db_sessionmaker)
     auth_provider = AuthProvider(config.auth)
-    currency_api = CurrencyAPI(config.fcsapi_access_key, client)
+    currency_api = CurrencyAPI(client)
 
     api_router.include_router(auth_provider.router)
 

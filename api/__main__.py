@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 import httpx
@@ -10,6 +11,7 @@ from starlette.middleware.cors import CORSMiddleware
 from api import v1
 from api.config import load_config
 from api.main_factory import create_app
+from scheduler.start import scheduler
 
 
 def main():
@@ -42,6 +44,9 @@ def main():
     main_api_router = APIRouter(prefix='/api')
     main_api_router.include_router(api_router_v1, prefix='/v1')
     app.include_router(main_api_router)
+
+    asyncio.create_task(scheduler(client, async_session, config))
+
     return app
 
 

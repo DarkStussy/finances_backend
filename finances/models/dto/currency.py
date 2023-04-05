@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from decimal import Decimal
 from dataclasses import dataclass
 from uuid import UUID
@@ -24,3 +25,11 @@ class Currency:
             rate_to_base_currency=dct.get('rate_to_base_currency'),
             user_id=dct.get('user'),
         )
+
+
+@dataclass
+class CurrencyPrice:
+    base: str
+    quote: str
+    price: Decimal
+    updated: datetime | None = None

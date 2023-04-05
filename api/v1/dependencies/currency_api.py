@@ -15,45 +15,14 @@ class CantGetPrice(Exception):
 
 
 @dataclass(frozen=True)
-class FCSAPI:
-    access_key: str
-    base_url: str = 'https://fcsapi.com/api-v3/forex'
-
-
-@dataclass(frozen=True)
 class BinanceAPI:
     base_url: str = 'https://api.binance.com/api/v3/'
 
 
 class CurrencyAPI:
-    def __init__(self, access_key: str, client: AsyncClient):
+    def __init__(self, client: AsyncClient):
         self._client = client
-        self.fcsapi = FCSAPI(access_key=access_key)
         self.binance_api = BinanceAPI()
-
-    async def get_currency_prices(
-            self,
-            currencies: set[str],
-            base_currency: str = 'USD'
-    ) -> dict[str, Decimal]:
-        response = await self._client.get(
-            f'{self.fcsapi.base_url}/latest',
-            params={
-                'symbol': ','.join(
-                    f'{base_currency}/{currency}' for currency in currencies),
-                'access_key': self.fcsapi.access_key
-            },
-            timeout=10
-        )
-        response_json = response.json()
-        status = response_json.get('status', False)
-        if not status:
-            logging.error(
-                f'[FSCAPI:get_currency_prices] response: {response_json}')
-            raise CantGetPrice
-
-        return {currency['s'].split('/')[-1]: Decimal(currency['c']) for
-                currency in response_json['response']}
 
     async def get_crypto_currency_price(self, crypto_code: str) -> Decimal:
         response = await self._client.get(
