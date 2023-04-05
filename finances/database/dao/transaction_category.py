@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from finances.database.dao import BaseDAO
@@ -9,6 +9,7 @@ from finances.exceptions.base import AddModelError, MergeModelError
 from finances.exceptions.transaction import TransactionCategoryExists, \
     TransactionCategoryNotFound
 from finances.models import dto
+from finances.models.enums.transaction_type import TransactionType
 
 
 class TransactionCategoryDAO(BaseDAO[TransactionCategory]):
@@ -20,6 +21,20 @@ class TransactionCategoryDAO(BaseDAO[TransactionCategory]):
         if category is None or category.deleted:
             raise TransactionCategoryNotFound
         return category.to_dto()
+
+    async def get_by_title_and_type(
+            self,
+            title: str,
+            transaction_type: TransactionType,
+            user_id: UUID
+    ) -> dto.TransactionCategory | None:
+        stmt = select(TransactionCategory).where(
+            TransactionCategory.title == title,
+            TransactionCategory.type == transaction_type.value,
+            TransactionCategory.user_id == user_id
+        )
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
 
     async def get_all(self, user_dto: dto.User,
                       transaction_type: str | None = None) \
@@ -60,3 +75,10 @@ class TransactionCategoryDAO(BaseDAO[TransactionCategory]):
             .returning(TransactionCategory.id)
         currency = await self.session.execute(stmt)
         return currency.scalar()
+
+    async def restore(self, category_id: int):
+        await self.session.execute(
+            update(TransactionCategory).where(
+                TransactionCategory.id == category_id
+            ).values({'deleted': False})
+        )

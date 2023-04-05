@@ -1,7 +1,6 @@
 from datetime import date
 from uuid import UUID
 
-
 from finances.database.dao import DAO
 from finances.database.dao.transaction_category import TransactionCategoryDAO
 from finances.exceptions.transaction import TransactionCategoryNotFound, \
@@ -33,6 +32,19 @@ async def add_transaction_category(
         user: dto.User,
         transaction_category_dao: TransactionCategoryDAO
 ) -> dto.TransactionCategory:
+    category_dto = dto.TransactionCategory.from_dict(category)
+    exiting_category_dto = \
+        await transaction_category_dao.get_by_title_and_type(
+            title=category_dto.title,
+            transaction_type=category_dto.type,
+            user_id=user.id
+        )
+    if exiting_category_dto is not None and exiting_category_dto.deleted:
+        await transaction_category_dao.restore(exiting_category_dto.id)
+        await transaction_category_dao.commit()
+        exiting_category_dto.deleted = False
+        return exiting_category_dto
+
     category_dto = dto.TransactionCategory.from_dict(category)
     category_dto.user_id = user.id
     category_dto = await transaction_category_dao.create(category_dto)
