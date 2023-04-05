@@ -181,7 +181,7 @@ async def change_transaction(
         await dao.asset.merge(asset_dto)
 
     transaction_dto.asset_id = asset_id
-    transaction_dto.category = category_id
+    transaction_dto.category_id = category_id
     transaction_dto.amount = amount
     transaction_dto.created = created
 
