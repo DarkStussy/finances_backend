@@ -42,7 +42,7 @@ class TransactionCategoryDAO(BaseDAO[TransactionCategory]):
         stmt = select(TransactionCategory).where(
             TransactionCategory.user_id == user_dto.id,
             TransactionCategory.deleted.__eq__(False)
-        )
+        ).order_by(TransactionCategory.id)
         if transaction_type:
             stmt = stmt.where(TransactionCategory.type == transaction_type)
 
