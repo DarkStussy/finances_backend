@@ -132,7 +132,7 @@ async def get_total_transactions_by_period_route(
         asset_id: UUID = Query(default=None),
         current_user: dto.User = Depends(get_current_user),
         dao: DAO = Depends(dao_provider)
-):
+) -> TotalResult:
     total = await get_total_transactions_by_period(
         start_date,
         end_date,
@@ -150,7 +150,7 @@ async def get_total_categories_by_period_route(
         transaction_type: TransactionType = Query(alias='type'),
         current_user: dto.User = Depends(get_current_user),
         dao: DAO = Depends(dao_provider)
-) -> list[dto.TotalByCategory]:
+) -> dto.TotalCategories:
     return await get_total_categories_by_period(
         start_date,
         end_date,

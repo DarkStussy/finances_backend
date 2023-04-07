@@ -1,3 +1,4 @@
+from decimal import Decimal
 from datetime import date
 from uuid import UUID
 
@@ -11,7 +12,6 @@ from finances.models.enums.transaction_type import TransactionType
 from .asset import get_asset_by_id
 from ..database.dao.transaction import TransactionDAO
 from ..exceptions.asset import AssetNotFound
-from ..models.dto import TotalByCategory
 
 
 # transaction category
@@ -280,12 +280,12 @@ async def get_total_categories_by_period(
         transaction_type: TransactionType,
         user: dto.User,
         dao: DAO
-) -> list[TotalByCategory]:
+) -> dto.TotalCategories:
     totals_cat_and_cur = await dao.transaction.get_total_categories_by_period(
         user, start_date, end_date, transaction_type.value
     )
     if not totals_cat_and_cur:
-        return []
+        return dto.TotalCategories(total=Decimal("0"), categories=[])
     currencies_codes = [
         total_cat_and_cur.currency_code for total_cat_and_cur in
         totals_cat_and_cur if total_cat_and_cur.rate_to_base_currency is None
@@ -314,9 +314,17 @@ async def get_total_categories_by_period(
             totals_by_category[
                 total_cat_and_cur.category] += total
 
-    return [TotalByCategory(category=cat, type=transaction_type.value,
-                            total=round(total, 2))
-            for cat, total in totals_by_category.items()]
+    result = [dto.TotalByCategory(category=cat, type=transaction_type.value,
+                                  total=round(total, 2))
+              for cat, total in totals_by_category.items()]
+    total = sum([item.total for item in result])
+
+    for item in result:
+        percentage = (item.total * 100) / total
+        item.percentage = round(percentage, 2)
+
+    result.sort(key=lambda x: x.total, reverse=True)
+    return dto.TotalCategories(total=total, categories=result)
 
 
 async def get_totals_by_asset(

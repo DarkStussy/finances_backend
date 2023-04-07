@@ -19,6 +19,13 @@ class TotalByCategory:
     category: str
     type: str
     total: Decimal
+    percentage: Decimal | None = None
+
+
+@dataclass
+class TotalCategories:
+    total: Decimal
+    categories: list[TotalByCategory]
 
 
 @dataclass
