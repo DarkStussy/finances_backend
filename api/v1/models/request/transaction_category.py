@@ -4,7 +4,7 @@ from finances.models.enums.transaction_type import TransactionType
 
 
 class TransactionCategoryCreate(BaseModel):
-    title: str = Field(min_length=3, max_length=100)
+    title: str = Field(min_length=3, max_length=50)
     type: TransactionType
 
 
