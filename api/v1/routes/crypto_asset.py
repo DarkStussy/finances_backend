@@ -32,7 +32,7 @@ async def get_crypto_asset_by_id_route(
 
 
 async def get_all_crypto_assets_route(
-        portfolio_id: UUID = Query(alias='portfolioID'),
+        portfolio_id: UUID,
         current_user: dto.User = Depends(get_current_user),
         dao: DAO = Depends(dao_provider)
 ) -> list[CryptoAssetResponse]:
