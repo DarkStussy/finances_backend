@@ -102,8 +102,12 @@ async def get_total_by_portfolio(
                                                    user.id)
     crypto_codes = [crypto_asset.crypto_currency.code for crypto_asset in
                     crypto_assets]
-    prices = await currency_api.get_crypto_currency_prices(crypto_codes)
     total = 0
+    if not crypto_codes:
+        return total
+
+    prices = await currency_api.get_crypto_currency_prices(crypto_codes)
+
     for crypto_asset in crypto_assets:
         total += crypto_asset.amount * prices[
             crypto_asset.crypto_currency.code + 'BUSD']
