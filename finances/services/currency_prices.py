@@ -26,4 +26,5 @@ async def get_crypto_currencies_prices(
 
     crypto_codes = [crypto_currency.code for crypto_currency in crypto_currencies]
     currencies_prices = await currency_api.get_crypto_currency_prices(crypto_codes)
-    return [dto.CryptoCurrencyPrice(code=code, price=price) for code, price in currencies_prices.items()]
+    return [dto.CryptoCurrencyPrice(code=code.replace('USDT', ''), price=price) for code, price in
+            currencies_prices.items()]
