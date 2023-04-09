@@ -19,11 +19,17 @@ class CryptoCurrencyDAO(BaseDAO[CryptoCurrency]):
             raise CryptoCurrencyNotFound
         return crypto_currency.to_dto()
 
-    async def get_all(self, code: str | None = None) \
-            -> list[dto.CryptoCurrency]:
+    async def get_all(
+            self,
+            code: str | None = None,
+            ids: list[int] | None = None
+    ) -> list[dto.CryptoCurrency]:
         stmt = select(CryptoCurrency)
         if code:
             stmt = stmt.filter(CryptoCurrency.code.like(f'%{code}%'))
+        elif ids:
+            stmt = stmt.where(CryptoCurrency.id.in_(ids))
+
         result = await self.session.execute(stmt)
         return [crypto_currency.to_dto() for crypto_currency in
                 result.scalars().all()]

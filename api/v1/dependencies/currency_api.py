@@ -24,31 +24,33 @@ class CurrencyAPI:
         self._client = client
         self.binance_api = BinanceAPI()
 
+    async def get_all_pairs(self) -> list[str]:
+        response = await self._client.get(
+            self.binance_api.base_url + 'ticker/price'
+        )
+        return [pair['symbol'] for pair in response.json()]
+
     async def get_crypto_currency_price(self, crypto_code: str) -> Decimal:
         response = await self._client.get(
-            f'{self.binance_api.base_url}ticker/price?symbol={crypto_code}BUSD'
+            f'{self.binance_api.base_url}ticker/price?symbol={crypto_code}USDT'
         )
         crypto_currency = response.json()
         if response.status_code != 200:
-            response = await self._client.get(
-                f'{self.binance_api.base_url}ticker/price?symbol={crypto_code}USDT'
-            )
-            crypto_currency = response.json()
-            if response.status_code != 200:
-                logging.error(
-                    f'[BinanceAPI:get_crypto_currency_price] response: '
-                    f'{crypto_currency}')
-                raise CantGetPrice
+            logging.error(
+                f'[BinanceAPI:get_crypto_currency_price] response: '
+                f'{crypto_currency}')
+            raise CantGetPrice
 
         return crypto_currency['price']
 
     async def get_crypto_currency_prices(self, crypto_codes: list[str]) \
             -> dict[str, Decimal]:
+        all_pairs = await self.get_all_pairs()
         response = await self._client.get(
             self.binance_api.base_url + 'ticker/price?symbols',
             params={
                 'symbols': '[' + ','.join(
-                    f'"{code}BUSD"' for code in crypto_codes) + ']'
+                    f'"{code}USDT"' for code in crypto_codes if f'{code}USDT' in all_pairs) + ']'
             }
         )
         prices = response.json()
