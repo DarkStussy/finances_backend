@@ -30,10 +30,16 @@ class CurrencyAPI:
         )
         crypto_currency = response.json()
         if response.status_code != 200:
-            logging.error(
-                f'[BinanceAPI:get_crypto_currency_price] response: '
-                f'{crypto_currency}')
-            raise CantGetPrice
+            response = await self._client.get(
+                f'{self.binance_api.base_url}ticker/price?symbol={crypto_code}USDT'
+            )
+            crypto_currency = response.json()
+            if response.status_code != 200:
+                logging.error(
+                    f'[BinanceAPI:get_crypto_currency_price] response: '
+                    f'{crypto_currency}')
+                raise CantGetPrice
+
         return crypto_currency['price']
 
     async def get_crypto_currency_prices(self, crypto_codes: list[str]) \
