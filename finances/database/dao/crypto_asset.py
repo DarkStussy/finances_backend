@@ -25,6 +25,15 @@ class CryptoAssetDAO(BaseDAO[CryptoAsset]):
             raise CryptoAssetNotFound
         return crypto_asset.to_dto()
 
+    async def get_by_currency(self, crypto_currency_id: int, user_id: UUID) -> dto.CryptoAsset | None:
+        stmt = select(CryptoAsset).where(
+            CryptoAsset.crypto_currency_id == crypto_currency_id,
+            CryptoAsset.user_id == user_id
+        )
+        result = await self.session.execute(stmt)
+        crypto_asset = result.scalar()
+        return crypto_asset.to_dto(with_currency=False) if crypto_asset else None
+
     async def get_all(self, portfolio_id: UUID, user_id: UUID) \
             -> list[dto.CryptoAsset]:
         stmt = select(CryptoAsset).where(
