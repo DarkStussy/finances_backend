@@ -25,13 +25,11 @@ class CryptoTransactionDAO(BaseDAO[CryptoTransaction]):
     async def get_all_by_crypto_asset(
             self,
             crypto_asset_id: int,
-            portfolio_id: UUID,
             user_id: UUID
     ) -> list[dto.CryptoTransaction]:
         result = await self.session.execute(
             select(CryptoTransaction).where(
                 CryptoTransaction.crypto_asset_id == crypto_asset_id,
-                CryptoTransaction.portfolio_id == portfolio_id,
                 CryptoTransaction.user_id == user_id
             )
         )

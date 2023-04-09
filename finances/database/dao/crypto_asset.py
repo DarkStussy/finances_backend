@@ -25,10 +25,14 @@ class CryptoAssetDAO(BaseDAO[CryptoAsset]):
             raise CryptoAssetNotFound
         return crypto_asset.to_dto()
 
-    async def get_by_currency(self, crypto_currency_id: int, user_id: UUID) -> dto.CryptoAsset | None:
+    async def get_by_currency(
+            self,
+            crypto_currency_id: int,
+            portfolio_id: UUID
+    ) -> dto.CryptoAsset | None:
         stmt = select(CryptoAsset).where(
             CryptoAsset.crypto_currency_id == crypto_currency_id,
-            CryptoAsset.user_id == user_id
+            CryptoAsset.portfolio_id == portfolio_id
         )
         result = await self.session.execute(stmt)
         crypto_asset = result.scalar()

@@ -32,7 +32,10 @@ async def add_crypto_transaction(
     crypto_asset_id = crypto_transaction.get('crypto_asset_id')
     crypto_currency_id = crypto_transaction.get('crypto_currency_id')
     if crypto_currency_id:
-        crypto_asset_dto = await dao.crypto_asset.get_by_currency(crypto_currency_id, user.id)
+        crypto_asset_dto = await dao.crypto_asset.get_by_currency(
+            crypto_currency_id,
+            portfolio_dto.id
+        )
         if crypto_asset_dto is None:
             crypto_asset_dto = dto.CryptoAsset(
                 id=None,
