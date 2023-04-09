@@ -55,9 +55,10 @@ async def add_crypto_transaction(
         crypto_transaction)
 
     amount = crypto_transaction['amount']
-    if crypto_transaction['type'] == CryptoTransactionType.BUY:
+    crypto_transaction_type = crypto_transaction['type']
+    if crypto_transaction_type == CryptoTransactionType.BUY:
         crypto_asset_dto.amount += amount
-    else:
+    elif crypto_transaction_type == CryptoTransactionType.SELL:
         crypto_asset_dto.amount -= amount
     await dao.crypto_asset.merge(crypto_asset_dto)
     crypto_transaction_dto = await dao.crypto_transaction.create(
