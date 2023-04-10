@@ -177,7 +177,7 @@ class CurrencyPrice(Base):
     base: Mapped[str] = mapped_column(String, primary_key=True)
     quote: Mapped[str] = mapped_column(String, primary_key=True)
     price: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
-    updated: Mapped[datetime] = mapped_column(DateTime, onupdate=func.now())
+    updated: Mapped[datetime] = mapped_column(DateTime, onupdate=func.now(), default=func.now())
 
     __mapper_args__ = {'eager_defaults': True}
 

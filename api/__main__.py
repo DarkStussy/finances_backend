@@ -5,13 +5,22 @@ import httpx
 import uvicorn
 
 from fastapi import APIRouter
+from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from starlette.middleware.cors import CORSMiddleware
 
 from api import v1
 from api.config import load_config
 from api.main_factory import create_app
+from finances.models.dto import Config
 from scheduler.start import scheduler
+
+
+def start_scheduler(client: AsyncClient, ss: async_sessionmaker, config: Config):
+    def func():
+        asyncio.create_task(scheduler(client, ss, config))
+
+    return func
 
 
 def main():
@@ -24,8 +33,8 @@ def main():
     async_session = async_sessionmaker(engine, expire_on_commit=False)
 
     client = httpx.AsyncClient()
+    app.add_event_handler('startup', start_scheduler(client, async_session, config))
     app.add_event_handler('shutdown', client.aclose)
-    app.add_event_handler('startup', lambda: asyncio.create_task(scheduler(client, async_session, config)))
     api_router_v1 = APIRouter()
 
     v1.dependencies.setup(app, api_router_v1, async_session, config, client)
