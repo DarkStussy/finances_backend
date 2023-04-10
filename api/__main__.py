@@ -25,7 +25,7 @@ def main():
 
     client = httpx.AsyncClient()
     app.add_event_handler('shutdown', client.aclose)
-
+    app.add_event_handler('startup', lambda: asyncio.create_task(scheduler(client, async_session, config)))
     api_router_v1 = APIRouter()
 
     v1.dependencies.setup(app, api_router_v1, async_session, config, client)
@@ -45,10 +45,8 @@ def main():
     main_api_router.include_router(api_router_v1, prefix='/v1')
     app.include_router(main_api_router)
 
-    asyncio.create_task(scheduler(client, async_session, config))
-
-    return app
+    uvicorn.run(app, host='0.0.0.0', port=8000)
 
 
 if __name__ == '__main__':
-    uvicorn.run('api:main', factory=True, log_config=None)
+    main()

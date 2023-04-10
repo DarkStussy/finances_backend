@@ -15,6 +15,7 @@ cryptography==37.0.4
 distlib==0.3.6
 dulwich==0.20.46
 ecdsa==0.18.0
+envparse==0.2.0
 exceptiongroup==1.1.0
 fastapi==0.89.1
 filelock==3.8.0

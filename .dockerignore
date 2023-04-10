@@ -1,0 +1,6 @@
+README.md
+venv
+.idea
+tests
+.pytest_cache
+finances/database/migrations/versions/*

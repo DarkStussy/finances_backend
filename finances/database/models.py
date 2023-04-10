@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import String, Integer, ForeignKey, Numeric, Boolean, \
-    BigInteger, DateTime, UniqueConstraint, func, FetchedValue
+    BigInteger, DateTime, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
 
@@ -177,9 +177,7 @@ class CurrencyPrice(Base):
     base: Mapped[str] = mapped_column(String, primary_key=True)
     quote: Mapped[str] = mapped_column(String, primary_key=True)
     price: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
-    updated: Mapped[datetime] = mapped_column(DateTime, onupdate=func.now(),
-                                              server_default=FetchedValue(),
-                                              server_onupdate=FetchedValue())
+    updated: Mapped[datetime] = mapped_column(DateTime, onupdate=func.now())
 
     __mapper_args__ = {'eager_defaults': True}
 
