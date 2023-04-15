@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from finances.database.dao import BaseDAO
-from finances.database.models import CryptoAsset
+from finances.database.models import CryptoAsset, CryptoTransaction
 from finances.exceptions.base import AddModelError, MergeModelError
 from finances.exceptions.crypto_asset import CryptoAssetNotFound, \
     AddCryptoAssetError, MergeCryptoAssetError
@@ -39,12 +39,23 @@ class CryptoAssetDAO(BaseDAO[CryptoAsset]):
         return crypto_asset.to_dto(
             with_currency=False) if crypto_asset else None
 
-    async def get_all(self, portfolio_id: UUID, user_id: UUID) \
-            -> list[dto.CryptoAsset]:
+    async def get_all(
+            self,
+            portfolio_id:
+            UUID, user_id: UUID,
+            without_transactions: bool = False
+    ) -> list[dto.CryptoAsset]:
         stmt = select(CryptoAsset).where(
             CryptoAsset.portfolio_id == portfolio_id,
-            CryptoAsset.user_id == user_id
+            CryptoAsset.user_id == user_id,
         ).options(joinedload(CryptoAsset.crypto_currency))
+        if without_transactions:
+            stmt = stmt.where(
+                CryptoAsset.id.in_(
+                    select(CryptoTransaction.crypto_asset_id).where(
+                        CryptoTransaction.crypto_asset_id == CryptoAsset.id)
+                )
+            )
         result = await self.session.execute(stmt)
         return [crypto_asset.to_dto() for crypto_asset in
                 result.scalars().all()]

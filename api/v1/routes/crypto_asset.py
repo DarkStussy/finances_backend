@@ -35,7 +35,8 @@ async def get_all_crypto_assets_route(
         current_user: dto.User = Depends(get_current_user),
         dao: DAO = Depends(dao_provider)
 ) -> list[CryptoAssetResponse]:
-    return await dao.crypto_asset.get_all(portfolio_id, current_user.id)
+    return await dao.crypto_asset.get_all(portfolio_id, current_user.id,
+                                          without_transactions=True)
 
 
 async def delete_crypto_asset_route(
