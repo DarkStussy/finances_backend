@@ -6,3 +6,5 @@ RUN python3 -m pip install -r requirements.txt
 COPY . .
 
 RUN chmod a+x *.sh
+
+RUN ./backend.sh
