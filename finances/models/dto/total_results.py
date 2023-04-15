@@ -43,6 +43,13 @@ class TotalsByAsset:
 
 
 @dataclass
+class TotalBuyCryptoAsset:
+    currency_code: str
+    total_amount: float
+    total_price: float
+
+
+@dataclass
 class TotalByPortfolio:
-    total: float
-    profit: float
+    current_total: float
+    totals_buy: list[TotalBuyCryptoAsset]

@@ -144,8 +144,8 @@ async def get_total_by_portfolio_route(
     else:
         return TotalByPortfolioResult(
             portfolio_id=portfolio_id,
-            total=total_by_portfolio.total,
-            profit=total_by_portfolio.profit
+            total=total_by_portfolio.current_total,
+            totals_buy=total_by_portfolio.totals_buy
         )
 
 

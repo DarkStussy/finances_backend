@@ -132,11 +132,21 @@ async def delete_crypto_transaction(
 async def get_total_buy_by_crypto_asset(
         crypto_asset_dto: dto.CryptoAsset,
         dao: DAO
-) -> float:
+) -> dto.TotalBuyCryptoAsset:
     transactions = await dao.crypto_transaction.get_all_by_crypto_asset(
         crypto_asset_dto.id, crypto_asset_dto.user_id)
-    total_buy = 0
+    total_price = 0
+    total_amount = 0
     for transaction in transactions:
-        total_buy += transaction.amount * transaction.price
+        if transaction.type == CryptoTransactionType.BUY:
+            total_price += transaction.amount * transaction.price
+            total_amount += transaction.amount
+        elif transaction.type == CryptoTransactionType.SELL:
+            total_price -= transaction.amount * transaction.price
+            total_amount -= transaction.amount
 
-    return total_buy
+    return dto.TotalBuyCryptoAsset(
+        currency_code=crypto_asset_dto.crypto_currency.code,
+        total_amount=total_amount,
+        total_price=round(total_price, 2)
+    )

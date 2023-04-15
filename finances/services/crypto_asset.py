@@ -32,8 +32,7 @@ async def get_total_buy(
         crypto_asset_id: int,
         user: dto.User,
         dao: DAO
-) -> float:
+) -> dto.TotalBuyCryptoAsset:
     crypto_asset_dto = await get_crypto_asset_by_id(crypto_asset_id, user,
                                                     dao.crypto_asset)
-    total_buy = await get_total_buy_by_crypto_asset(crypto_asset_dto, dao)
-    return round(total_buy, 2)
+    return await get_total_buy_by_crypto_asset(crypto_asset_dto, dao)

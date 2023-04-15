@@ -5,7 +5,6 @@ from starlette import status
 
 from api.v1.dependencies import get_current_user, dao_provider
 from api.v1.models.response.crypto_asset import CryptoAssetResponse
-from api.v1.models.response.total_result import TotalResult
 from finances.database.dao import DAO
 from finances.exceptions.crypto_asset import CryptoAssetNotFound
 from finances.models import dto
@@ -57,14 +56,14 @@ async def get_total_buy_route(
         crypto_asset_id: int,
         current_user: dto.User = Depends(get_current_user),
         dao: DAO = Depends(dao_provider)
-) -> TotalResult:
+) -> dto.TotalBuyCryptoAsset:
     try:
-        total = await get_total_buy(crypto_asset_id, current_user, dao)
+        total_buy = await get_total_buy(crypto_asset_id, current_user, dao)
     except CryptoAssetNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=e.message)
     else:
-        return TotalResult(total=total)
+        return total_buy
 
 
 def get_crypto_asset_router() -> APIRouter:

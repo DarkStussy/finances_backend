@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime, date
 from uuid import UUID
 
+from finances.models import dto
 from .transaction import TransactionResponse
 
 
@@ -16,7 +17,7 @@ class TotalResult:
 class TotalByPortfolioResult:
     portfolio_id: UUID
     total: float
-    profit: float
+    totals_buy: list[dto.TotalBuyCryptoAsset]
     server_time: datetime = datetime.utcnow()
 
 

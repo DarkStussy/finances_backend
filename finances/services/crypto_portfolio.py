@@ -104,18 +104,17 @@ async def get_total_by_portfolio(
     crypto_codes = [crypto_asset.crypto_currency.code for crypto_asset in
                     crypto_assets]
     total = 0
-    profit = 0
     if not crypto_codes:
-        return dto.TotalByPortfolio(total=0, profit=profit)
+        return dto.TotalByPortfolio(current_total=total, totals_buy=[])
 
     prices = await currency_api.get_crypto_currency_prices(crypto_codes)
 
-    total_buy = 0
+    totals_buy = []
     for crypto_asset in crypto_assets:
         total += crypto_asset.amount * prices.get(
             crypto_asset.crypto_currency.code + 'USDT', 0)
-        total_buy += await get_total_buy_by_crypto_asset(crypto_asset, dao)
+        totals_buy.append(
+            await get_total_buy_by_crypto_asset(crypto_asset, dao))
 
     total = round(total, 2)
-    profit = round(total - total_buy, 2)
-    return dto.TotalByPortfolio(total=total, profit=profit)
+    return dto.TotalByPortfolio(current_total=total, totals_buy=totals_buy)
