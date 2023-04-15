@@ -19,7 +19,7 @@ async def scheduler(httpx_client: AsyncClient, ss: async_sessionmaker,
         ss=ss
     )
 
-    # await add_prices_task(fcs_client, ss)
+    await add_prices_task(fcs_client, ss)
     while True:
         await aioschedule.run_pending()
         await asyncio.sleep(0.1)
