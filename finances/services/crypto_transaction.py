@@ -127,3 +127,16 @@ async def delete_crypto_transaction(
 
     await dao.crypto_asset.merge(crypto_asset_dto)
     await dao.commit()
+
+
+async def get_total_buy_by_crypto_asset(
+        crypto_asset_dto: dto.CryptoAsset,
+        dao: DAO
+) -> float:
+    transactions = await dao.crypto_transaction.get_all_by_crypto_asset(
+        crypto_asset_dto.id, crypto_asset_dto.user_id)
+    total_buy = 0
+    for transaction in transactions:
+        total_buy += transaction.amount * transaction.price
+
+    return total_buy

@@ -9,4 +9,4 @@ from .crypto_currency import CryptoCurrency, CryptoCurrencyPrice
 from .crypto_asset import CryptoAsset
 from .crypto_transaction import CryptoTransaction
 from .total_results import TotalByCategoryAndCurrency, TotalByCategory, \
-    Transactions, TotalsByAsset, TotalCategories
+    Transactions, TotalsByAsset, TotalCategories, TotalByPortfolio

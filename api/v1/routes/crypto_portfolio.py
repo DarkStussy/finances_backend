@@ -9,7 +9,7 @@ from api.v1.dependencies.currency_api import CantGetPrice
 from api.v1.models.request.crypto_portfolio import CryptoPortfolioCreate, \
     CryptoPortfolioChange
 from api.v1.models.response.crypto_portfolio import CryptoPortfolioResponse
-from api.v1.models.response.total_result import TotalResult
+from api.v1.models.response.total_result import TotalByPortfolioResult
 from finances.database.dao import DAO
 from finances.exceptions.crypto_portfolio import CryptoPortfolioExists, \
     CryptoPortfolioNotFound
@@ -133,15 +133,20 @@ async def get_total_by_portfolio_route(
         current_user: dto.User = Depends(get_current_user),
         dao: DAO = Depends(dao_provider),
         currency_api: CurrencyAPI = Depends(currency_api_provider)
-) -> TotalResult:
+) -> TotalByPortfolioResult:
     try:
-        total = await get_total_by_portfolio(portfolio_id, current_user, dao,
-                                             currency_api)
+        total_by_portfolio = await get_total_by_portfolio(portfolio_id,
+                                                          current_user, dao,
+                                                          currency_api)
     except CantGetPrice:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                             detail='Unable to calculate total price')
     else:
-        return TotalResult(total=total)
+        return TotalByPortfolioResult(
+            portfolio_id=portfolio_id,
+            total=total_by_portfolio.total,
+            profit=total_by_portfolio.profit
+        )
 
 
 def get_crypto_portfolio_router() -> APIRouter:

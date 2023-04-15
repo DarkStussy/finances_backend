@@ -13,6 +13,14 @@ class TotalResult:
 
 
 @dataclass
+class TotalByPortfolioResult:
+    portfolio_id: UUID
+    total: float
+    profit: float
+    server_time: datetime = datetime.utcnow()
+
+
+@dataclass
 class TotalAssetResult:
     asset_id: UUID
     total: float

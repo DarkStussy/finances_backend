@@ -40,3 +40,9 @@ class Transactions:
 class TotalsByAsset:
     income: Decimal
     expense: Decimal
+
+
+@dataclass
+class TotalByPortfolio:
+    total: float
+    profit: float
