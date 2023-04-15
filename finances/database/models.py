@@ -27,7 +27,7 @@ class Base(DeclarativeBase):
 
 
 class User(Base):
-    __tablename__ = 'user'
+    __tablename__ = 'users'
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True),
                                           primary_key=True,
@@ -58,20 +58,20 @@ class User(Base):
 
 
 class UserConfiguration(Base):
-    __tablename__ = 'user_config'
+    __tablename__ = 'users_configs'
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True),
-                                          ForeignKey('user.id',
+                                          ForeignKey('users.id',
                                                      ondelete='CASCADE'),
                                           primary_key=True)
     base_currency_id: Mapped[int] = mapped_column(
         Integer,
-        ForeignKey('currency.id', ondelete='SET NULL'),
+        ForeignKey('currencies.id', ondelete='SET NULL'),
         nullable=True)
 
     base_crypto_portfolio_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey('crypto_portfolio.id', ondelete='SET NULL'),
+        ForeignKey('crypto_portfolios.id', ondelete='SET NULL'),
         nullable=True
     )
 
@@ -87,17 +87,17 @@ class UserConfiguration(Base):
 
 
 class Asset(Base):
-    __tablename__ = 'asset'
+    __tablename__ = 'assets'
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True,
                                           default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True),
-                                               ForeignKey('user.id',
+                                               ForeignKey('users.id',
                                                           ondelete='CASCADE'),
                                                nullable=False)
     title: Mapped[str] = mapped_column(String, nullable=False)
     currency_id: Mapped[int] = mapped_column(Integer,
-                                             ForeignKey('currency.id',
+                                             ForeignKey('currencies.id',
                                                         ondelete='SET NULL'),
                                              nullable=True)
     amount: Mapped[Decimal] = mapped_column(Numeric, default=0)
@@ -135,7 +135,7 @@ class Asset(Base):
 
 
 class Currency(Base):
-    __tablename__ = 'currency'
+    __tablename__ = 'currencies'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
@@ -143,7 +143,7 @@ class Currency(Base):
     is_custom: Mapped[bool] = mapped_column(Boolean, default=True)
     rate_to_base_currency: Mapped[Optional[Decimal]] = mapped_column(Numeric)
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True),
-                                               ForeignKey('user.id',
+                                               ForeignKey('users.id',
                                                           ondelete='CASCADE'),
                                                nullable=True)
 
@@ -172,14 +172,13 @@ class Currency(Base):
 
 
 class CurrencyPrice(Base):
-    __tablename__ = 'currency_price'
+    __tablename__ = 'currencies_prices'
 
     base: Mapped[str] = mapped_column(String, primary_key=True)
     quote: Mapped[str] = mapped_column(String, primary_key=True)
     price: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
-    updated: Mapped[datetime] = mapped_column(DateTime, onupdate=func.now(), default=func.now())
-
-    __mapper_args__ = {'eager_defaults': True}
+    updated: Mapped[datetime] = mapped_column(DateTime, onupdate=func.now(),
+                                              default=func.now())
 
     def to_dto(self) -> dto.CurrencyPrice:
         return dto.CurrencyPrice(
@@ -199,20 +198,20 @@ class CurrencyPrice(Base):
 
 
 class Transaction(Base):
-    __tablename__ = 'transaction'
+    __tablename__ = 'transactions'
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True),
-                                               ForeignKey('user.id',
+                                               ForeignKey('users.id',
                                                           ondelete='CASCADE'),
                                                nullable=False)
     asset_id: Mapped[uuid.UUID] = mapped_column(UUID,
-                                                ForeignKey('asset.id',
+                                                ForeignKey('assets.id',
                                                            ondelete='CASCADE'),
                                                 nullable=False)
     category_id: Mapped[int] = mapped_column(Integer,
                                              ForeignKey(
-                                                 'transaction_category.id',
+                                                 'transaction_categories.id',
                                                  ondelete='CASCADE'),
                                              nullable=False)
     amount: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
@@ -249,13 +248,13 @@ class Transaction(Base):
 
 
 class TransactionCategory(Base):
-    __tablename__ = 'transaction_category'
+    __tablename__ = 'transaction_categories'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     title: Mapped[str] = mapped_column(String, nullable=False)
     type: Mapped[str] = mapped_column(String, nullable=False)
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True),
-                                               ForeignKey('user.id',
+                                               ForeignKey('users.id',
                                                           ondelete='CASCADE'),
                                                nullable=False)
     deleted: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -289,12 +288,12 @@ class TransactionCategory(Base):
 
 
 class CryptoPortfolio(Base):
-    __tablename__ = 'crypto_portfolio'
+    __tablename__ = 'crypto_portfolios'
 
     id: Mapped[int] = mapped_column(UUID(as_uuid=True), primary_key=True,
                                     default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True),
-                                               ForeignKey('user.id',
+                                               ForeignKey('users.id',
                                                           ondelete='CASCADE'),
                                                nullable=False)
     title: Mapped[str] = mapped_column(String, nullable=False)
@@ -321,22 +320,22 @@ class CryptoPortfolio(Base):
 
 
 class CryptoAsset(Base):
-    __tablename__ = 'crypto_asset'
+    __tablename__ = 'crypto_assets'
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey('user.id', ondelete='CASCADE'),
+        ForeignKey('users.id', ondelete='CASCADE'),
         nullable=False
     )
     portfolio_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey('crypto_portfolio.id', ondelete='CASCADE'),
+        ForeignKey('crypto_portfolios.id', ondelete='CASCADE'),
         nullable=False
     )
     crypto_currency_id: Mapped[int] = mapped_column(
         Integer,
-        ForeignKey('crypto_currency.id', ondelete='SET NULL'),
+        ForeignKey('crypto_currencies.id', ondelete='SET NULL'),
         nullable=False
     )
     amount: Mapped[Decimal] = mapped_column(Numeric, default=0, nullable=False)
@@ -371,7 +370,7 @@ class CryptoAsset(Base):
 
 
 class CryptoCurrency(Base):
-    __tablename__ = 'crypto_currency'
+    __tablename__ = 'crypto_currencies'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
@@ -395,20 +394,20 @@ class CryptoCurrency(Base):
 
 
 class CryptoTransaction(Base):
-    __tablename__ = 'crypto_portfolio_transaction'
+    __tablename__ = 'crypto_transactions'
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey('user.id', ondelete='CASCADE'),
+        ForeignKey('users.id', ondelete='CASCADE'),
         nullable=False)
     portfolio_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey('crypto_portfolio.id', ondelete='CASCADE'),
+        ForeignKey('crypto_portfolios.id', ondelete='CASCADE'),
         nullable=False)
     crypto_asset_id: Mapped[int] = mapped_column(
         BigInteger,
-        ForeignKey('crypto_asset.id', ondelete='CASCADE'),
+        ForeignKey('crypto_assets.id', ondelete='CASCADE'),
         nullable=False)
     type: Mapped[str] = mapped_column(String, nullable=False)
     amount: Mapped[Decimal] = mapped_column(Numeric, nullable=False)

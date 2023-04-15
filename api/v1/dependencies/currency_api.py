@@ -50,7 +50,8 @@ class CurrencyAPI:
             self.binance_api.base_url + 'ticker/price?symbols',
             params={
                 'symbols': '[' + ','.join(
-                    f'"{code}USDT"' for code in crypto_codes if f'{code}USDT' in all_pairs) + ']'
+                    f'"{code}USDT"' for code in crypto_codes if
+                    f'{code}USDT' in all_pairs) + ']'
             }
         )
         prices = response.json()

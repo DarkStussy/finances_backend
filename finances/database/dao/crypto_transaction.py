@@ -31,7 +31,8 @@ class CryptoTransactionDAO(BaseDAO[CryptoTransaction]):
             select(CryptoTransaction).where(
                 CryptoTransaction.crypto_asset_id == crypto_asset_id,
                 CryptoTransaction.user_id == user_id
-            ).order_by(CryptoTransaction.created.desc(), CryptoTransaction.id.desc())
+            ).order_by(CryptoTransaction.created.desc(),
+                       CryptoTransaction.id.desc())
         )
         return [crypto_transaction.to_dto() for crypto_transaction in
                 result.scalars().all()]

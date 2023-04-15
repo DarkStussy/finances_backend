@@ -15,8 +15,8 @@ class CurrencyPriceDAO(BaseDAO[CurrencyPrice]):
         currency_price = await self._get_by_id((base, quote))
         return currency_price.to_dto() if currency_price else None
 
-    async def get_prices(self, base: str, quotes: list[str]) -> dict[
-        str, dto.CurrencyPrice]:
+    async def get_prices(self, base: str, quotes: list[str]) \
+            -> dict[str, dto.CurrencyPrice]:
         stmt = select(CurrencyPrice).where(
             CurrencyPrice.quote.in_(quotes),
             CurrencyPrice.base == base

@@ -7,7 +7,8 @@ from api.v1.dependencies.currency_api import CantGetPrice
 from finances.database.dao import DAO
 from finances.exceptions.crypto_currency import CryptoCurrencyNotFound
 from finances.models import dto
-from finances.services.currency_prices import get_crypto_currency_price, get_crypto_currencies_prices
+from finances.services.currency_prices import get_crypto_currency_price, \
+    get_crypto_currencies_prices
 
 
 async def get_crypto_currency_by_id_route(
@@ -70,7 +71,8 @@ def get_crypto_currency_router() -> APIRouter:
     router = APIRouter()
     router.add_api_route('/all', get_all_crypto_currencies_route,
                          methods=['GET'])
-    router.add_api_route('/price', get_crypto_currencies_prices_route, methods=['POST'])
+    router.add_api_route('/price', get_crypto_currencies_prices_route,
+                         methods=['POST'])
     router.add_api_route('/price/{crypto_currency_id}',
                          get_crypto_currency_price_route, methods=['GET'])
     router.add_api_route('/{crypto_currency_id}',

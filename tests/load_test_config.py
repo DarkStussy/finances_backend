@@ -1,24 +1,23 @@
-import os
 from datetime import timedelta
-
-from dotenv import load_dotenv
+from envparse import Env
 
 from finances.models.dto import Config, DatabaseConfig, AuthConfig
 
 
 def load_test_config() -> Config:
-    load_dotenv()
+    env = Env()
+    env.read_envfile()
 
     return Config(
         db=DatabaseConfig(
-            host=os.getenv('TEST_PG_HOST'),
-            username=os.getenv('TEST_PG_USERNAME'),
-            password=os.getenv('TEST_PG_PASSWORD'),
-            database=os.getenv('TEST_PG_DATABASE'),
+            host=env.str('TEST_PG_HOST'),
+            username=env.str('TEST_PG_USERNAME'),
+            password=env.str('TEST_PG_PASSWORD'),
+            database=env.str('TEST_PG_DATABASE'),
         ),
         auth=AuthConfig(
-            secret_key=os.getenv('TEST_SECRET_KEY'),
+            secret_key=env.str('TEST_SECRET_KEY'),
             token_expire=timedelta(days=1)
         ),
-        fcsapi_access_key=os.getenv('FCSAPI_API_KEY')
+        fcsapi_access_key=env.str('FCSAPI_API_KEY')
     )

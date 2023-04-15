@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from datetime import datetime, date
 from uuid import UUID
 
-from finances.models.dto import TotalByCategory
 from .transaction import TransactionResponse
 
 

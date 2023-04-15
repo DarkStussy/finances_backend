@@ -14,26 +14,32 @@ from api.config import load_config
 from api.main_factory import create_app
 from finances.models.dto import Config
 from scheduler.start import scheduler
+from utils.load_currencies import load_currencies
 
 
-def start_scheduler(client: AsyncClient, ss: async_sessionmaker, config: Config):
-    def func():
+def start_scheduler(
+        client: AsyncClient,
+        ss: async_sessionmaker,
+        config: Config
+):
+    async def start():
+        await load_currencies(ss)
         asyncio.create_task(scheduler(client, ss, config))
 
-    return func
+    return start
 
 
 def main():
     logging.basicConfig(level=logging.DEBUG)
 
-    # app = FastAPI(swagger_ui_parameters={"defaultModelsExpandDepth": -1})
     app = create_app()
     config = load_config()
     engine = create_async_engine(url=config.db.make_url, echo=False)
     async_session = async_sessionmaker(engine, expire_on_commit=False)
 
     client = httpx.AsyncClient()
-    app.add_event_handler('startup', start_scheduler(client, async_session, config))
+    app.add_event_handler('startup',
+                          start_scheduler(client, async_session, config))
     app.add_event_handler('shutdown', client.aclose)
     api_router_v1 = APIRouter()
 

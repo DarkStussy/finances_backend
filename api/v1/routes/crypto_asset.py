@@ -1,7 +1,6 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi import Query
 from starlette import status
 
 from api.v1.dependencies import get_current_user, dao_provider

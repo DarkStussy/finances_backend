@@ -20,11 +20,15 @@ async def get_crypto_currencies_prices(
         crypto_currency_dao: CryptoCurrencyDAO,
         currency_api: CurrencyAPI
 ) -> list[dto.CryptoCurrencyPrice]:
-    crypto_currencies = await crypto_currency_dao.get_all(ids=crypto_currencies)
+    crypto_currencies = await crypto_currency_dao.get_all(
+        ids=crypto_currencies)
     if not crypto_currencies:
         return []
 
-    crypto_codes = [crypto_currency.code for crypto_currency in crypto_currencies]
-    currencies_prices = await currency_api.get_crypto_currency_prices(crypto_codes)
-    return [dto.CryptoCurrencyPrice(code=code.replace('USDT', ''), price=price) for code, price in
+    crypto_codes = [crypto_currency.code for crypto_currency in
+                    crypto_currencies]
+    currencies_prices = await currency_api.get_crypto_currency_prices(
+        crypto_codes)
+    return [dto.CryptoCurrencyPrice(code=code.replace('USDT', ''), price=price)
+            for code, price in
             currencies_prices.items()]

@@ -1,14 +1,13 @@
 from datetime import timedelta
 
-from dotenv import load_dotenv
 from envparse import Env
 
 from finances.models.dto import Config, DatabaseConfig, AuthConfig
 
 
 def load_config() -> Config:
-    load_dotenv()
     env = Env()
+    env.read_envfile()
 
     return Config(
         db=DatabaseConfig(

@@ -36,7 +36,8 @@ class CryptoAssetDAO(BaseDAO[CryptoAsset]):
         )
         result = await self.session.execute(stmt)
         crypto_asset = result.scalar()
-        return crypto_asset.to_dto(with_currency=False) if crypto_asset else None
+        return crypto_asset.to_dto(
+            with_currency=False) if crypto_asset else None
 
     async def get_all(self, portfolio_id: UUID, user_id: UUID) \
             -> list[dto.CryptoAsset]:
